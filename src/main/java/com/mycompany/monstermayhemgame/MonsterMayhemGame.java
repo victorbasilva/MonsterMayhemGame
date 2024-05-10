@@ -90,8 +90,70 @@ public class MonsterMayhemGame {
  * Method for taking a player's turn.
  * @param player The player taking the turn.
  */
-    private void performPlayerTurn(Player player) {
-        // Logic implemented for the player to make his move
+    private void performPlayerTurn(Player player) { // Logic implemented for the player to make his move
+        System.out.println("\nPlayer turn: " + player.getName());
+        
+        // Shows the options available to the player
+        System.out.println("Choose an action:");
+        System.out.println("1. Place a monster");
+        System.out.println("2. Move a monster");
+        System.out.println("3. Pass");
+        
+        int choice = scanner.nextInt();
+        
+        switch (choice) {
+        case 1: // Place a monster on the board
+            placeMonsterOnBoard(player);
+            break;
+        case 2: // Move a monster on the board
+            moveMonsterOnBoard(player);
+            break;
+        case 3: // The player decides to pass the turn
+            System.out.println(player.getName() + "passed the turn.");
+            break;
+        }
+        
+        /**
+  * Method to place a monster on the board.
+  * @param player The player placing the monster.
+  */
+    private void placeMonsterOnBoard(Player player) { // Requests the coordinates to place the monster
+        System.out.println("Enter the line to place the monster (0-9): ");
+        int row = scanner.nextInt();
+        System.out.print("Enter the column to place the monster (0-9): ");
+        int col = scanner.nextInt();
+
+        if (board.isCellOccupied(row, col)) { // Checks if the position is occupied on the board
+        System.out.println("This position is already occupied. Choose another position.");
+        placeMonsterOnBoard(player); // Recursively call the method to choose another position
+        return;        
+
+        }
+        // Place the monster on the board
+        Monster monster = chooseMonsterType(player);
+        board.placeMonster(monster, row, col);
+        player.addMonster(monster);
+        
+        
+    }
+    
+    /**
+  * Method for the player to choose the type of monster to be placed.
+  * @param player The player choosing the monster.
+  * @return The monster chosen by the player.
+  */
+    private Monster chooseMonsterType(Player player) { // Shows the monster options available to the player
+        System.out.println("Choose an action:");
+        System.out.println("1. Place a monster");
+        System.out.println("2. Move a monster");
+        System.out.println("3. Pass");
+
+/////////////////////TO BE CONTINUED//////////////////////////
+
+
+
+    }
+        
     }
     
     /**
@@ -110,6 +172,5 @@ public class MonsterMayhemGame {
         MonsterMayhemGame game = new MonsterMayhemGame();
         game.startGame();
     }
-    
-    
 }
+    
