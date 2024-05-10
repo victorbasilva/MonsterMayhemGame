@@ -4,6 +4,12 @@
 
 package com.mycompany.monstermayhemgame;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
 /**
  * Concurrent Systems - CA2
  * @author Victor - 2021259
