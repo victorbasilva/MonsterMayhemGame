@@ -143,17 +143,35 @@ public class MonsterMayhemGame {
   * @return The monster chosen by the player.
   */
     private Monster chooseMonsterType(Player player) { // Shows the monster options available to the player
-        System.out.println("Choose an action:");
-        System.out.println("1. Place a monster");
-        System.out.println("2. Move a monster");
-        System.out.println("3. Pass");
-
-/////////////////////TO BE CONTINUED//////////////////////////
+        System.out.println("Choose a monster type:");
+        System.out.println("1. Vampire");
+        System.out.println("2. Werewolf");
+        System.out.println("3. Ghost");
 
 
-
-    }
+        int choice = scanner.nextInt();
         
+        switch (choice) { // Creates and returns the monster chosen by the player
+        case 1:
+            return new Vampire(-1, -1); // -1 to indicate that the monster is not yet on the board
+         case 2:
+             return new Werewolf(-1, -1);
+        case 3:
+            return new Ghost(-1, -1);
+        default:
+            System.out.println("Invalid choice. Choose again.");
+            return chooseMonsterType(player); // Recursively call the method to choose again
+
+        }
+        
+    }
+    
+    /**
+  * Method to move a monster on the board.
+  * @param player The player moving the monster.
+  */
+    private void moveMonsterOnBoard(Player player) {
+        // Implementation of logic to move a monster on the board
     }
     
     /**
@@ -162,6 +180,19 @@ public class MonsterMayhemGame {
     private void displayGameResult() {
         // Display game winner and final statistics
         // Part implemented according to user interface
+        System.out.println("\nGame over!");
+        
+        // Find the winning player
+        Player winner = players.stream().filter(player -> player.getMonsters().size() < 10).findFirst().orElse(null);
+        
+        if (winner != null) {
+        System.out.println("The player " + winner.getName() + " won the game!");
+        } else {
+        System.out.println("Draw! There is no winner in this game.");
+    }
+        for (Player player : players) { // Displays each player's final stats
+        System.out.println(player.getName() + ": Wins - " + player.getWins() + ", Defeats - " + player.getLosses());
+        }
     }
     
     /**
