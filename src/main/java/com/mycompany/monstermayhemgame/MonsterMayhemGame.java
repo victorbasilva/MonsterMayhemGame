@@ -111,7 +111,12 @@ public class MonsterMayhemGame {
         case 3: // The player decides to pass the turn
             System.out.println(player.getName() + "passed the turn.");
             break;
+            default: 
+                System.out.println("Invalid choice. Try again.");
+                performPlayerTurn(player); // Recursively call the method to try again
+            break;
         }
+    }
         
         /**
   * Method to place a monster on the board.
