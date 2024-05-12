@@ -5,6 +5,7 @@
 package com.mycompany.monstermayhemgame;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 public class Player {
     
     private String name; //Name of the player
-    private ArrayList<Monster> monsters; //Player's monster list
+    private List<Monster> monsters; //Player's monster list
     private int wins; // Number of player wins
     private int losses; // Number of player losses
     
@@ -54,6 +55,14 @@ public class Player {
     }
     
     /**
+ * Method to obtain the player's monster list.
+ * @return The player's monster list.
+ */
+    public List<Monster> getMonsters() {
+        return monsters;
+    } 
+    
+    /**
  * Method to obtain the player's number of wins.
  * @return The player's number of wins.
  */
@@ -62,13 +71,27 @@ public class Player {
     }
     
     /**
- * Method to obtain the player's number of defeats.
- * @return The player's number of defeats.
- */
+* Method to increase the player's number of wins.
+*/
+    public void incrementWins() {
+        wins++;
+    }
+       
+    /**
+* Method to obtain the player's number of defeats.
+* @return The player's number of defeats.
+*/
     public int getLosses() {
         return losses;
     }
     
     // Methods for updating statistics, etc.
+    
+    /**
+* Method to increase the player's number of defeats.
+*/
+    public void incrementLosses() {
+        losses++;
+    }
     
 }
