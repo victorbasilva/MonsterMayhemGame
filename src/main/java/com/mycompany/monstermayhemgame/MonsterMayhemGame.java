@@ -177,7 +177,33 @@ public class MonsterMayhemGame {
   */
     private void moveMonsterOnBoard(Player player) {
         // Implementation of logic to move a monster on the board
+        List<Monster> playerMonsters = player.getMonsters(); // Shows the monsters available to move
+    if (playerMonsters.isEmpty()) {
+        System.out.println("You have no monsters to move.");
+        return;
+        }
+    
+    System.out.println("Escolha um monstro para mover:");
+    for (int i = 0; i < playerMonsters.size(); i++) {
+        System.out.println((i + 1) + ". " + playerMonsters.get(i).getClass().getSimpleName());
     }
+    
+    int choice = scanner.nextInt();
+    if (choice < 1 || choice > playerMonsters.size()) {
+        System.out.println("Escolha inválida. Tente novamente.");
+        moveMonsterOnBoard(player); // Recursively call the method to try again
+        return;
+    }
+    
+    Monster monster = playerMonsters.get(choice - 1);
+    
+    // Request new coordinates to move the monster
+    System.out.println("Enter new line to move monster (0-9): ");
+    int newRow = scanner.nextInt();
+    System.out.print("Enter the new column to move the monster (0-9): ");
+    int newCol = scanner.nextInt();
+    
+}
     
     /**
  * Method to display the final result of the game.
