@@ -51,4 +51,24 @@ public class Board {
         }
     }
     // Other methods for manipulating the board, such as moving monsters, checking for collisions, etc.
+    
+    public void displayBoard() {
+        System.out.println("  0 1 2 3 4 5 6 7 8 9"); // Column header
+        for (int row = 0; row < SIZE; row++) {
+            System.out.print(row + " "); // Line header
+            for (int col = 0; col < SIZE; col++) {
+                if (grid[row][col] == null) {
+                    System.out.print(". "); // Empty cell
+                    } else if (grid[row][col] instanceof Vampire) {
+                    System.out.print("V "); // Representation of the Vampire
+                    } else if (grid[row][col] instanceof Werewolf) {
+                    System.out.print("W "); // Representation of the Werewolf
+                    } else if (grid[row][col] instanceof Ghost) {
+                    System.out.print("G "); // Representation of the Ghost
+                    }
+            }
+            System.out.println();
+        }
+    }
+            
 }
