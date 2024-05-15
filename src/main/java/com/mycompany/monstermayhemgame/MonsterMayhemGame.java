@@ -16,7 +16,7 @@ import java.util.Scanner;
  */
 public class MonsterMayhemGame {
     private List<Player> players; // Players list
-    private Board board; // Board game
+    private Board board= new Board(); // Board game
     private int currentPlayerIndex; // Current player index
     private Random random; // Random number generator
     private Scanner scanner; // Scanner for user input
@@ -84,6 +84,12 @@ public class MonsterMayhemGame {
     private void displayGameState() {
         // Displays the current state of the board and statistics for each player
         // Part implemented according to user interface
+        board.displayBoard(); 
+        for (Player player : players) { // Displays statistics for each player
+            System.out.println(player.getName() + ": Monsters - " + player.getMonsters().size() + 
+                ", Victories - " + player.getWins() + ", Defeats - " + player.getLosses());
+        }
+ 
     }
     
     /**
@@ -91,7 +97,7 @@ public class MonsterMayhemGame {
  * @param player The player taking the turn.
  */
     private void performPlayerTurn(Player player) { // Logic implemented for the player to make his move
-        System.out.println("\nPlayer turn: " + player.getName());
+        System.out.println("Player's turn: " + player.getName());   
         
         // Shows the options available to the player
         System.out.println("Choose an action:");
@@ -99,9 +105,9 @@ public class MonsterMayhemGame {
         System.out.println("2. Move a monster");
         System.out.println("3. Pass");
         
-        int choice = scanner.nextInt();
+        int action = scanner.nextInt();
         
-        switch (choice) {
+        switch (action) {
         case 1: // Place a monster on the board
             placeMonsterOnBoard(player);
             break;
@@ -109,16 +115,18 @@ public class MonsterMayhemGame {
             moveMonsterOnBoard(player);
             break;
         case 3: // The player decides to pass the turn
-            System.out.println(player.getName() + "passed the turn.");
+            System.out.println(player.getName() + " passed the turn.");
             break;
-            default: 
-                System.out.println("Invalid choice. Try again.");
-                performPlayerTurn(player); // Recursively call the method to try again
-            break;
+        default: 
+            System.out.println("Invalid choice. Try again.");
+            performPlayerTurn(player); // Recursively call the method to try again
+            return;
         }
+        displayGameState();
+
     }
         
-        /**
+    /**
   * Method to place a monster on the board.
   * @param player The player placing the monster.
   */
@@ -166,7 +174,6 @@ public class MonsterMayhemGame {
         default:
             System.out.println("Invalid choice. Choose again.");
             return chooseMonsterType(player); // Recursively call the method to choose again
-
         }
         
     }
@@ -183,14 +190,15 @@ public class MonsterMayhemGame {
         return;
         }
     
-    System.out.println("Escolha um monstro para mover:");
+    System.out.println("Choose a monster to move:"); // Shows the monsters available to move
     for (int i = 0; i < playerMonsters.size(); i++) {
-        System.out.println((i + 1) + ". " + playerMonsters.get(i).getClass().getSimpleName());
+        System.out.println((i + 1) + ". " + playerMonsters.get(i).getClass().getSimpleName() + 
+                " in position (" + playerMonsters.get(i).row + ", " + playerMonsters.get(i).col + ")");
     }
     
     int choice = scanner.nextInt();
     if (choice < 1 || choice > playerMonsters.size()) {
-        System.out.println("Escolha inválida. Tente novamente.");
+        System.out.println("Invalid choice. Try again.");
         moveMonsterOnBoard(player); // Recursively call the method to try again
         return;
     }
@@ -203,6 +211,24 @@ public class MonsterMayhemGame {
     System.out.print("Enter the new column to move the monster (0-9): ");
     int newCol = scanner.nextInt();
     
+    // Checks if the new position is within the board limits
+    if (newRow < 0 || newRow > 9 || newCol < 0 || newCol > 9) {
+            System.out.println("Position out of bounds. Please try again.");
+            moveMonsterOnBoard(player); // Recursively call the method to try again
+            return;
+    }
+    
+    // Checks if the destination cell is occupied
+    if (board.isCellOccupied(newRow, newCol)) {
+            System.out.println("The destination cell is busy. Please try again.");
+            moveMonsterOnBoard(player); // Recursively call the method to try again
+            return;
+    }
+    
+    board.removeMonster(monster.row, monster.col); // Remove the monster from the current position
+    board.placeMonster(monster, newRow, newCol); // Move the monster to the new position
+
+        
 }
     
     /**

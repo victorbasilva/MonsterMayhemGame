@@ -36,6 +36,21 @@ public class Board {
             System.out.println("Invalid position on the board.");
  }
  }
+    
+    /**
+      * Method to remove a monster from a specific position on the board.
+      * @param row The row from which the monster will be removed.
+      * @param col The column the monster will be removed from.
+      */
+    public void removeMonster(int row, int col) {
+        if (row >= 0 && row < SIZE && col >= 0 && col < SIZE) {
+            grid[row][col] = null; // Remove the monster from the specified position
+            } else {
+            System.out.println("Invalid position on the board.");
+         }
+     }
+    
+    
     /**
  * Method to check if a cell on the board is occupied by a monster.
  * @param row The row of the cell to check.
