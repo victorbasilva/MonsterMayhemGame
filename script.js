@@ -1,0 +1,217 @@
+document.getElementById('start-game').addEventListener('click', startGame);
+
+const board = document.querySelector('#board table');
+const playerActions = document.getElementById('player-actions');
+const statusDiv = document.getElementById('status');
+
+let currentPlayerIndex = 0;
+const players = [];
+const monsters = { 1: [], 2: [], 3: [], 4: [] };
+const areas = {
+    1: { startRow: 0, endRow: 4, startCol: 0, endCol: 4 },
+    2: { startRow: 0, endRow: 4, startCol: 5, endCol: 9 },
+    3: { startRow: 5, endRow: 9, startCol: 0, endCol: 4 },
+    4: { startRow: 5, endRow: 9, startCol: 5, endCol: 9 }
+};
+const monsterTypes = ['vampire', 'werewolf', 'ghost'];
+
+function startGame() {
+    for (let i = 1; i <= 4; i++) {
+        const playerName = document.getElementById(`player${i}`).value.trim();
+        if (!playerName) {
+            alert(`Please enter Player name ${i}`);
+            return;
+        }
+        players.push({ name: playerName, id: i, monsterCount: 0 });
+    }
+
+    document.getElementById('player-names').classList.add('hidden');
+    document.getElementById('board').classList.remove('hidden');
+    createBoard();
+    determineFirstPlayer();
+
+    // Esconder os botões na tela inicial
+    document.getElementById('insert-monster').style.display = 'inline-block';
+    document.getElementById('move-monster').style.display = 'inline-block';
+    document.getElementById('pass-turn').style.display = 'inline-block';
+}
+
+
+
+
+function createBoard() {
+    for (let i = 0; i < 10; i++) {
+        const row = board.insertRow();
+        for (let j = 0; j < 10; j++) {
+            const cell = row.insertCell();
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+            cell.addEventListener('click', handleCellClick);
+        }
+    }
+}
+
+function determineFirstPlayer() {
+    currentPlayerIndex = Math.floor(Math.random() * 4);
+    updateCurrentPlayer();
+}
+
+function updateCurrentPlayer() {
+    const currentPlayer = players[currentPlayerIndex];
+    statusDiv.innerText = `Vez de ${currentPlayer.name}`;
+}
+
+function handleCellClick(event) {
+    const cell = event.target;
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
+    const currentPlayer = players[currentPlayerIndex];
+
+    if (isValidMove(currentPlayer, row, col)) {
+        insertMonster(currentPlayer, row, col);
+    } else {
+        alert('Invalid move!');
+    }
+}
+
+function isValidMove(player, row, col) {
+    const area = areas[player.id];
+    return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
+}
+
+function handleCellClick(event) {
+    const cell = event.target;
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
+    const currentPlayer = players[currentPlayerIndex];
+
+    if (isValidInsertion(currentPlayer, row, col)) {
+        insertMonster(currentPlayer, row, col);
+    } else {
+        alert('You can only insert monsters within your area!');
+    }
+}
+
+function isValidInsertion(player, row, col) {
+    const area = areas[player.id];
+    return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
+}
+
+
+function insertMonster(player, row, col) {
+    const monsterType = prompt(`Choose a monster to place: ${monsterTypes.join(', ')}`).toLowerCase();
+    if (!monsterTypes.includes(monsterType)) {
+        alert('Invalid monster type!');
+        return;
+    }
+
+    const cell = board.rows[row].cells[col];
+    cell.innerText = monsterType.charAt(0).toUpperCase();
+    cell.dataset.player = player.id;
+    cell.dataset.type = monsterType;
+
+    player.monsterCount++;
+    endTurn();
+}
+
+function endTurn() {
+    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    updateCurrentPlayer();
+}
+document.getElementById('move-monster').addEventListener('click', () => {
+    const currentPlayer = players[currentPlayerIndex];
+    const monsterCells = Array.from(board.getElementsByTagName('td'))
+        .filter(cell => cell.dataset.player == currentPlayer.id);
+
+    if (monsterCells.length === 0) {
+        alert('No monsters to move!');
+        return;
+    }
+
+    const fromRow = parseInt(prompt('Move row monster:'));
+    const fromCol = parseInt(prompt('Move column monster:'));
+    const toRow = parseInt(prompt('To line:'));
+    const toCol = parseInt(prompt('To column:'));
+
+    moveMonster(currentPlayer, fromRow, fromCol, toRow, toCol);
+});
+
+function moveMonster(player, fromRow, fromCol, toRow, toCol) {
+    const fromCell = board.rows[fromRow].cells[fromCol];
+    const toCell = board.rows[toRow].cells[toCol];
+
+    if (fromCell.dataset.player != player.id) {
+        alert('You can only move your own monsters!');
+        return;
+    }
+
+    const validMove = (
+        Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) <= 2 && 
+        (toRow === fromRow || toCol === fromCol || Math.abs(toRow - fromRow) === Math.abs(toCol - fromCol))
+    );
+
+    if (!validMove) {
+        alert('Invalid move!');
+        return;
+    }
+
+    const monsterType = fromCell.dataset.type;
+    fromCell.innerText = '';
+    fromCell.dataset.player = '';
+    fromCell.dataset.type = '';
+
+    if (toCell.dataset.player) {
+        handleCombat(toCell, monsterType);
+    } else {
+        toCell.innerText = monsterType.charAt(0).toUpperCase();
+        toCell.dataset.player = player.id;
+        toCell.dataset.type = monsterType;
+    }
+
+    endTurn();
+}
+
+function handleCombat(cell, incomingMonsterType) {
+    const defendingMonsterType = cell.dataset.type;
+    const defendingPlayerId = parseInt(cell.dataset.player);
+
+    if (incomingMonsterType === 'vampire' && defendingMonsterType === 'werewolf' ||
+        incomingMonsterType === 'werewolf' && defendingMonsterType === 'ghost' ||
+        incomingMonsterType === 'ghost' && defendingMonsterType === 'vampire') {
+        cell.innerText = incomingMonsterType.charAt(0).toUpperCase();
+        cell.dataset.player = players[currentPlayerIndex].id;
+        cell.dataset.type = incomingMonsterType;
+        decrementMonsterCount(defendingPlayerId);
+    } else if (incomingMonsterType === defendingMonsterType) {
+        cell.innerText = '';
+        cell.dataset.player = '';
+        cell.dataset.type = '';
+        decrementMonsterCount(defendingPlayerId);
+        decrementMonsterCount(players[currentPlayerIndex].id);
+    } else {
+        decrementMonsterCount(players[currentPlayerIndex].id);
+    }
+}
+
+function decrementMonsterCount(playerId) {
+    const player = players.find(p => p.id === playerId);
+    player.monsterCount--;
+    if (player.monsterCount <= 0) {
+        alert(`${player.name} was eliminated!`);
+        players.splice(players.indexOf(player), 1);
+        if (players.length === 1) {
+            alert(`${players[0].name} won the game!`);
+            resetGame();
+        }
+    }
+}
+
+function resetGame() {
+    location.reload();
+    // Exibir os botões na tela inicial ao reiniciar o jogo
+    document.getElementById('insert-monster').style.display = 'none';
+    document.getElementById('move-monster').style.display = 'none';
+    document.getElementById('pass-turn').style.display = 'none';
+}
+
+

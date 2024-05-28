@@ -1,0 +1,91 @@
+body {
+    background-image: url('monstermayhemgame.jpeg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#game-container {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8); /* Adicionando um fundo semi-transparente */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#game-title {
+    color: red;
+    font-size: 56px;
+    margin-bottom: 20px;
+}
+
+#player-names input[type="text"] {
+    margin: 5px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+#player-names input[type="text"]:focus {
+    outline: none;
+    border-color: #66afe9;
+}
+
+.hidden {
+    display: none;
+}
+
+table {
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+td {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #000;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#player-actions {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#start-game {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#start-game:hover {
+    background-color: #45a049;
+}
+
+
+
