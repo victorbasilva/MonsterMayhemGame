@@ -8,29 +8,40 @@ package com.mycompany.monstermayhemgame;
  *
  * @author Victor
  */
+
 public abstract class Monster {
-    protected int row; // Monster's current row on the board
-    protected int col; // Monster's current column on the board
-    
-    /**
- * Monster class constructor.
- * @param row The monster's starting row on the board.
- * @param col The monster's starting column on the board.
- */
-    public Monster(int row, int col) {
-        this.row = row; // Initialize the monster line
-        this.col = col; // Initialize the monster column
-        
-        
+    private String name;
+    private int health;
+    private int attackPower;
+
+    public Monster(String name, int health, int attackPower) {
+        this.name = name;
+        this.health = health;
+        this.attackPower = attackPower;
     }
-    
-    /**
- * Abstract method to move the monster to a new position on the board.
- * @param newRow The new row to move the monster.
- * @param newCol The new column to move the monster to.
- */
-    public abstract void move(int newRow, int newCol);
-    
-    // Other abstract methods for monster manipulation, like checking for collisions, etc.   
-       
+
+    public String getName() {
+        return name;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getAttackPower() {
+        return attackPower;
+    }
+
+    public void attack(Monster target) {
+        target.setHealth(target.getHealth() - this.attackPower);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s [Health: %d, Attack Power: %d]", name, health, attackPower);
+    }
 }

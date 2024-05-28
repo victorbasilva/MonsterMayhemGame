@@ -8,27 +8,9 @@ package com.mycompany.monstermayhemgame;
  *
  * @author Victor
  */
+
 public class Vampire extends Monster {
-     /**
- * Vampire class constructor.
- * @param row The vampire's starting row on the board.
- * @param col The vampire's starting column on the board.
- */
-    public Vampire(int row, int col) {
-        super(row, col); //Calls the constructor of the Monster superclass
+    public Vampire() {
+        super("Vampire", 100, 20);
     }
-    
-    /**
- * Method to move the vampire to a new position on the board.
- * @param newRow The new row to move the vampire.
- * @param newCol The new column to move the vampire to.
- */
-    
-    @Override
-    public void move(int newRow, int newCol) {
-        // Specific implementation for vampire movement
-    }
-    
-    // Other vampire-specific methods if necessary
-    
 }
