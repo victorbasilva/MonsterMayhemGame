@@ -51,7 +51,9 @@ td {
     border: 1px solid #000;
     text-align: center;
     vertical-align: middle;
+    position: relative; /* Added to support absolutely positioned elements */
 }
+
 
 #player-actions {
     margin-top: 20px;
@@ -101,6 +103,14 @@ button:hover {
     background-color: lightcoral; /* Use lightcoral for a light red color */
 }
 
+.watermark {
+    position: absolute;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.2); /* black color with 20% opacity */
+    pointer-events: none; /* Ignore clicks on text */
+    top: 2px;
+    left: 2px;
+}
 
 
 

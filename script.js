@@ -1,4 +1,5 @@
 document.getElementById('start-game').addEventListener('click', startGame);
+document.getElementById('skip-turn').addEventListener('click', skipTurn);
 
 const board = document.querySelector('#board table');
 const playerActions = document.getElementById('player-actions');
@@ -38,7 +39,7 @@ function startGame() {
     // Hide buttons on the home screen
     document.getElementById('insert-monster').style.display = 'inline-block';
     document.getElementById('move-monster').style.display = 'inline-block';
-    document.getElementById('pass-turn').style.display = 'inline-block';
+    document.getElementById('skip-turn').style.display = 'inline-block';
 }
 
 function createBoard() {
@@ -50,6 +51,12 @@ function createBoard() {
             cell.dataset.col = j;
             cell.addEventListener('click', handleCellClick);
 
+            // Adding numbering as a watermark
+            const waterMark = document.createElement('span');
+            waterMark.classList.add('watermark');
+            waterMark.innerText = `${i},${j}`;
+            cell.appendChild(waterMark);
+
             if ((i < 5 && j < 5) || (i >= 5 && j >= 5)) {
                 cell.classList.add('light-green');
             } else if ((i < 5 && j >= 5) || (i >= 5 && j < 5)) {
@@ -58,6 +65,7 @@ function createBoard() {
         }
     }
 }
+
 
 function determineFirstPlayer() {
     currentPlayerIndex = Math.floor(Math.random() * 4);
@@ -209,9 +217,11 @@ function resetGame() {
     // Display buttons on home screen when restarting the game
     document.getElementById('insert-monster').style.display = 'none';
     document.getElementById('move-monster').style.display = 'none';
-    document.getElementById('pass-turn').style.display = 'none';
+    document.getElementById('skip-turn').style.display = 'none';
 }
 
-
+function skipTurn() {
+    endTurn();
+}
 
 
