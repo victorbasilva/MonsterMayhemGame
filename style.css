@@ -36,21 +36,6 @@ body {
     border-color: #66afe9;
 }
 
-#start-game {
-    padding: 10px 20px;
-    font-size: 18px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#start-game:hover {
-    background-color: #45a049;
-}
-
 .hidden {
     display: none;
 }
@@ -87,13 +72,34 @@ button:hover {
     background-color: #45a049;
 }
 
+#start-game {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#start-game:hover {
+    background-color: #45a049;
+}
+
 #status {
     color: red;
     font-size: 20px;
     margin-top: 20px; /* Added top spacing for better visualization */
 }
 
+.light-green {
+    background-color: lightgreen;
+}
 
+.light-red {
+    background-color: lightcoral; /* Use lightcoral for a light red color */
+}
 
 
 

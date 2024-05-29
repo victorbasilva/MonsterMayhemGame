@@ -44,6 +44,12 @@ function createBoard() {
             cell.dataset.row = i;
             cell.dataset.col = j;
             cell.addEventListener('click', handleCellClick);
+
+            if ((i < 5 && j < 5) || (i >= 5 && j >= 5)) {
+                cell.classList.add('light-green');
+            } else if ((i < 5 && j >= 5) || (i >= 5 && j < 5)) {
+                cell.classList.add('light-red');
+            }
         }
     }
 }
@@ -55,25 +61,9 @@ function determineFirstPlayer() {
 
 function updateCurrentPlayer() {
     const currentPlayer = players[currentPlayerIndex];
-    statusDiv.innerText = `It's ${currentPlayer.name}'s turn`;
-}
-
-function handleCellClick(event) {
-    const cell = event.target;
-    const row = parseInt(cell.dataset.row);
-    const col = parseInt(cell.dataset.col);
-    const currentPlayer = players[currentPlayerIndex];
-
-    if (isValidMove(currentPlayer, row, col)) {
-        insertMonster(currentPlayer, row, col);
-    } else {
-        alert('Invalid move!');
-    }
-}
-
-function isValidMove(player, row, col) {
-    const area = areas[player.id];
-    return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
+    statusDiv.innerText = `TURN: ${currentPlayer.name}`;
+    statusDiv.style.color = 'red';
+    statusDiv.style.fontSize = '14px';
 }
 
 function handleCellClick(event) {
@@ -102,6 +92,11 @@ function insertMonster(player, row, col) {
     }
 
     const cell = board.rows[row].cells[col];
+    if (cell.dataset.player) {
+        alert('Cell already occupied!');
+        return;
+    }
+
     cell.innerText = monsterType.charAt(0).toUpperCase();
     cell.dataset.player = player.id;
     cell.dataset.type = monsterType;
@@ -114,6 +109,7 @@ function endTurn() {
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     updateCurrentPlayer();
 }
+
 document.getElementById('move-monster').addEventListener('click', () => {
     const currentPlayer = players[currentPlayerIndex];
     const monsterCells = Array.from(board.getElementsByTagName('td'))
@@ -126,7 +122,7 @@ document.getElementById('move-monster').addEventListener('click', () => {
 
     const fromRow = parseInt(prompt('Move row monster:'));
     const fromCol = parseInt(prompt('Move column monster:'));
-    const toRow = parseInt(prompt('To line:'));
+    const toRow = parseInt(prompt('To row:'));
     const toCol = parseInt(prompt('To column:'));
 
     moveMonster(currentPlayer, fromRow, fromCol, toRow, toCol);
@@ -142,8 +138,9 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
     }
 
     const validMove = (
-        Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) <= 2 && 
-        (toRow === fromRow || toCol === fromCol || Math.abs(toRow - fromRow) === Math.abs(toCol - fromCol))
+        (Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) == 0) ||
+        (Math.abs(toRow - fromRow) == 0 && Math.abs(toCol - fromCol) <= 2) ||
+        (Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) <= 2)
     );
 
     if (!validMove) {
@@ -209,5 +206,7 @@ function resetGame() {
     document.getElementById('move-monster').style.display = 'none';
     document.getElementById('pass-turn').style.display = 'none';
 }
+
+
 
 
