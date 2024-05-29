@@ -13,7 +13,12 @@ const areas = {
     3: { startRow: 5, endRow: 9, startCol: 0, endCol: 4 },
     4: { startRow: 5, endRow: 9, startCol: 5, endCol: 9 }
 };
-const monsterTypes = ['vampire', 'werewolf', 'ghost'];
+const monsterTypes = {
+    1: { name: 'vampire', icon: '🧛' },
+    2: { name: 'werewolf', icon: '🐺' },
+    3: { name: 'ghost', icon: '👻' }
+};
+
 
 function startGame() {
     for (let i = 1; i <= 4; i++) {
@@ -63,7 +68,7 @@ function updateCurrentPlayer() {
     const currentPlayer = players[currentPlayerIndex];
     statusDiv.innerText = `TURN: ${currentPlayer.name}`;
     statusDiv.style.color = 'red';
-    statusDiv.style.fontSize = '14px';
+    statusDiv.style.fontSize = '24px';
 }
 
 function handleCellClick(event) {
@@ -85,8 +90,8 @@ function isValidInsertion(player, row, col) {
 }
 
 function insertMonster(player, row, col) {
-    const monsterType = prompt(`Choose a monster to place: ${monsterTypes.join(', ')}`).toLowerCase();
-    if (!monsterTypes.includes(monsterType)) {
+    const monsterType = parseInt(prompt('Choose a monster to place: 1 (vampire), 2 (werewolf), 3 (ghost)'));
+    if (!monsterTypes[monsterType]) {
         alert('Invalid monster type!');
         return;
     }
@@ -97,7 +102,7 @@ function insertMonster(player, row, col) {
         return;
     }
 
-    cell.innerText = monsterType.charAt(0).toUpperCase();
+    cell.innerText = monsterTypes[monsterType].icon;
     cell.dataset.player = player.id;
     cell.dataset.type = monsterType;
 
@@ -148,7 +153,7 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
         return;
     }
 
-    const monsterType = fromCell.dataset.type;
+    const monsterType = parseInt(fromCell.dataset.type);
     fromCell.innerText = '';
     fromCell.dataset.player = '';
     fromCell.dataset.type = '';
@@ -156,7 +161,7 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
     if (toCell.dataset.player) {
         handleCombat(toCell, monsterType);
     } else {
-        toCell.innerText = monsterType.charAt(0).toUpperCase();
+        toCell.innerText = monsterTypes[monsterType].icon;
         toCell.dataset.player = player.id;
         toCell.dataset.type = monsterType;
     }
@@ -165,13 +170,13 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
 }
 
 function handleCombat(cell, incomingMonsterType) {
-    const defendingMonsterType = cell.dataset.type;
+    const defendingMonsterType = parseInt(cell.dataset.type);
     const defendingPlayerId = parseInt(cell.dataset.player);
 
-    if (incomingMonsterType === 'vampire' && defendingMonsterType === 'werewolf' ||
-        incomingMonsterType === 'werewolf' && defendingMonsterType === 'ghost' ||
-        incomingMonsterType === 'ghost' && defendingMonsterType === 'vampire') {
-        cell.innerText = incomingMonsterType.charAt(0).toUpperCase();
+    if ((incomingMonsterType === 1 && defendingMonsterType === 2) ||
+        (incomingMonsterType === 2 && defendingMonsterType === 3) ||
+        (incomingMonsterType === 3 && defendingMonsterType === 1)) {
+        cell.innerText = monsterTypes[incomingMonsterType].icon;
         cell.dataset.player = players[currentPlayerIndex].id;
         cell.dataset.type = incomingMonsterType;
         decrementMonsterCount(defendingPlayerId);
