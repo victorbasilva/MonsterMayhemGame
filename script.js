@@ -30,14 +30,11 @@ function startGame() {
     createBoard();
     determineFirstPlayer();
 
-    // Esconder os botões na tela inicial
+    // Hide buttons on the home screen
     document.getElementById('insert-monster').style.display = 'inline-block';
     document.getElementById('move-monster').style.display = 'inline-block';
     document.getElementById('pass-turn').style.display = 'inline-block';
 }
-
-
-
 
 function createBoard() {
     for (let i = 0; i < 10; i++) {
@@ -58,7 +55,7 @@ function determineFirstPlayer() {
 
 function updateCurrentPlayer() {
     const currentPlayer = players[currentPlayerIndex];
-    statusDiv.innerText = `Vez de ${currentPlayer.name}`;
+    statusDiv.innerText = `It's ${currentPlayer.name}'s turn`;
 }
 
 function handleCellClick(event) {
@@ -96,7 +93,6 @@ function isValidInsertion(player, row, col) {
     const area = areas[player.id];
     return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
 }
-
 
 function insertMonster(player, row, col) {
     const monsterType = prompt(`Choose a monster to place: ${monsterTypes.join(', ')}`).toLowerCase();
@@ -208,7 +204,7 @@ function decrementMonsterCount(playerId) {
 
 function resetGame() {
     location.reload();
-    // Exibir os botões na tela inicial ao reiniciar o jogo
+    // Display buttons on home screen when restarting the game
     document.getElementById('insert-monster').style.display = 'none';
     document.getElementById('move-monster').style.display = 'none';
     document.getElementById('pass-turn').style.display = 'none';
