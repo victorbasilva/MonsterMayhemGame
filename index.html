@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monster Mayhem1.2</title>
+    <title id="game-title">Monster Mayhem</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-container">
-        <h1 id="game-title">Monster Mayhem1.2</h1>
+        <h1 id="game-title">Monster Mayhem</h1>
         <div id="player-names">
             <input type="text" id="player1" placeholder="Player 1 Name">
             <input type="text" id="player2" placeholder="Player 2 Name">
@@ -16,17 +16,39 @@
             <input type="text" id="player4" placeholder="Player 4 Name">
             <button id="start-game">Start Game</button>
         </div>
-            <div id="board" class="hidden">
+        <div id="board" class="hidden">
             <table></table>
             <div id="status" class="status"></div>
-            <div id="player-actions">
+            <div id="player-actions" class="hidden">
                 <button id="insert-monster">Add Monster</button>
                 <button id="move-monster">Move Monster</button>
-                <button id="skip-turn">Skip Turn</button> 
+                <button id="skip-turn">Skip Turn</button>  
+            </div>
+            <div id="player-status">
+                <table id="status-table">
+                    <thead class="hidden"> <!-- Hide the table header (suppose to hide only at the home screen - it needs to show
+                        after we hit start game and place 1 monster at least as a header of the game status table) -->
+                        <tr>
+                            <th>Player</th>
+                            <th>Monsters</th>
+                            <th>Eliminated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Player status will be dynamically inserted here -->
+                    </tbody>
+                </table>
+                <div id="combat-rules" class="hidden"> <!-- Hide combat rules -->
+                    <p>🧛 X 🐺 = 🧛</p>
+                    <p>🐺 X 👻 = 🐺</p>
+                    <p>👻 X 🧛 = 👻</p>
+                </div>
             </div>
         </div>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
+
+
 

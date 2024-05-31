@@ -33,6 +33,10 @@ function startGame() {
 
     document.getElementById('player-names').classList.add('hidden');
     document.getElementById('board').classList.remove('hidden');
+    document.getElementById('player-actions').classList.remove('hidden');
+    document.getElementById('player-status').classList.remove('hidden');
+    document.getElementById('combat-rules').classList.remove('hidden');
+    
     createBoard();
     determineFirstPlayer();
 
@@ -41,6 +45,9 @@ function startGame() {
     document.getElementById('move-monster').style.display = 'inline-block';
     document.getElementById('skip-turn').style.display = 'inline-block';
 }
+
+
+
 
 function createBoard() {
     for (let i = 0; i < 10; i++) {
@@ -74,7 +81,7 @@ function determineFirstPlayer() {
 
 function updateCurrentPlayer() {
     const currentPlayer = players[currentPlayerIndex];
-    statusDiv.innerText = `TURN: ${currentPlayer.name}`;
+    statusDiv.innerHTML = `TURN: <strong>${currentPlayer.name}</strong>`;
     statusDiv.style.color = 'red';
     statusDiv.style.fontSize = '24px';
 }
@@ -115,6 +122,7 @@ function insertMonster(player, row, col) {
     cell.dataset.type = monsterType;
 
     player.monsterCount++;
+    updatePlayerStatus(); // Update player status
     endTurn();
 }
 
@@ -192,9 +200,30 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
         toCell.dataset.type = monsterType;
     }
 
+    updatePlayerStatus(); // Update player status
     endTurn();
 }
 
+function updatePlayerStatus() {
+    const statusTableBody = document.querySelector('#status-table tbody');
+    statusTableBody.innerHTML = ''; // Clear previous status
+
+    players.forEach(player => {
+        const row = document.createElement('tr');
+        const playerNameCell = document.createElement('td');
+        const monsterCountCell = document.createElement('td');
+        const eliminatedCountCell = document.createElement('td');
+
+        playerNameCell.textContent = player.name;
+        monsterCountCell.textContent = player.monsterCount;
+        eliminatedCountCell.textContent = player.eliminatedCount || 0;
+
+        row.appendChild(playerNameCell);
+        row.appendChild(monsterCountCell);
+        row.appendChild(eliminatedCountCell);
+        statusTableBody.appendChild(row);
+    });
+}
 
 function handleCombat(cell, incomingMonsterType) {
     const defendingMonsterType = parseInt(cell.dataset.type);
@@ -216,11 +245,15 @@ function handleCombat(cell, incomingMonsterType) {
     } else {
         decrementMonsterCount(players[currentPlayerIndex].id);
     }
+
+    updatePlayerStatus(); // Update player status
 }
 
 function decrementMonsterCount(playerId) {
     const player = players.find(p => p.id === playerId);
     player.monsterCount--;
+    player.eliminatedCount = (player.eliminatedCount || 0) + 1;
+
     if (player.monsterCount <= 0) {
         alert(`${player.name} was eliminated!`);
         players.splice(players.indexOf(player), 1);
@@ -229,6 +262,8 @@ function decrementMonsterCount(playerId) {
             resetGame();
         }
     }
+
+    updatePlayerStatus(); // Update player status
 }
 
 function resetGame() {

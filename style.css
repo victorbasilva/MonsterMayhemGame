@@ -13,14 +13,21 @@ body {
     text-align: center;
     background-color: rgba(255, 255, 255, 0.8); /* Adding a semi-transparent background */
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 30px;
 }
 
-#game-title {
-    color: red;
-    font-size: 56px;
-    margin-bottom: 20px;
+/* Define the custom font */
+@font-face {
+    font-family: 'MyCustomFont';
+    src: url('fonts/myfont.ttf') format('truetype');
 }
+
+/* Apply the custom font to the game title */
+#game-title {
+    font-family: 'MyCustomFont', sans-serif;
+    color: red;    
+}
+
 
 #player-names input[type="text"] {
     margin: 5px;
@@ -40,19 +47,27 @@ body {
     display: none;
 }
 
+#board {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+}
+
+
 table {
     margin: 0 auto;
     border-collapse: collapse;
 }
 
 td {
-    width: 30px;
-    height: 30px;
+    width: 40px; /* Increase cell width */
+    height: 40px; /* Increase cell height */
     border: 1px solid #000;
     text-align: center;
     vertical-align: middle;
-    position: relative; /* Added to support absolutely positioned elements */
+    position: relative;
 }
+
 
 
 #player-actions {
@@ -93,6 +108,7 @@ button:hover {
     color: red;
     font-size: 20px;
     margin-top: 20px; /* Added top spacing for better visualization */
+    margin-left: 20px;
 }
 
 .light-green {
@@ -112,7 +128,42 @@ button:hover {
     left: 2px;
 }
 
+#player-status {
+    margin-left: 20px;
+    margin-top: 20px; /* Add top margin for spacing */
+}
 
+#status-table {
+    border-collapse: collapse;
+    width: 100%; /* Make the table take the full width of its container */
+    margin-bottom: 20px;
+}
 
+#status-table th, #status-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+}
 
+#status-table th {
+    background-color: #f2f2f2;
+}
 
+#combat-rules {
+    text-align: left;
+    font-size: 18px;
+    margin-top: 20px; /* Add top margin for spacing */
+}
+
+#player-status {
+    margin-top: 50px; /* Adjust the space above the status table */
+}
+
+#player-actions {
+    margin-top: 20px; /* Add space between the status table and buttons */
+}
+
+#player-actions button {
+    display: block; /* Place the buttons on top of each other */
+    margin: 10px auto; /* Center buttons horizontally */
+}
