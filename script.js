@@ -133,8 +133,26 @@ document.getElementById('move-monster').addEventListener('click', () => {
         return;
     }
 
-    const fromRow = parseInt(prompt('Move row monster:'));
-    const fromCol = parseInt(prompt('Move column monster:'));
+    let monsterOptions = 'Choose a monster to move:\n';
+    const monstersToMove = [];
+
+    monsterCells.forEach((cell, index) => {
+        const row = cell.dataset.row;
+        const col = cell.dataset.col;
+        const monsterType = monsterTypes[parseInt(cell.dataset.type)].name;
+        monsterOptions += `${index + 1}. ${monsterType} at (${row}, ${col})\n`;
+        monstersToMove.push({ cell, row, col });
+    });
+
+    const choice = parseInt(prompt(monsterOptions)) - 1;
+
+    if (choice < 0 || choice >= monstersToMove.length) {
+        alert('Invalid choice!');
+        return;
+    }
+
+    const fromRow = parseInt(monstersToMove[choice].row);
+    const fromCol = parseInt(monstersToMove[choice].col);
     const toRow = parseInt(prompt('To row:'));
     const toCol = parseInt(prompt('To column:'));
 
@@ -176,6 +194,7 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
 
     endTurn();
 }
+
 
 function handleCombat(cell, incomingMonsterType) {
     const defendingMonsterType = parseInt(cell.dataset.type);
