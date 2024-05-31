@@ -151,9 +151,9 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
     }
 
     const validMove = (
-        (Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) == 0) ||
-        (Math.abs(toRow - fromRow) == 0 && Math.abs(toCol - fromCol) <= 2) ||
-        (Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) <= 2)
+        (toRow === fromRow && toCol !== fromCol) || // Horizontal move
+        (toRow !== fromRow && toCol === fromCol) || // Vertical move
+        (Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) <= 2) // Diagonal move
     );
 
     if (!validMove) {
