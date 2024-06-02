@@ -1,35 +1,78 @@
-document.getElementById('start-game').addEventListener('click', startGame);
+const url = "ws://localhost:3000";
+const wsServer = new WebSocket(url);
+
+let playerName;
+let game;
+let currentPlayerIndex;
+let players;
+let monsters;
+let areas;
+let monsterTypes;
+let isGameStarted = false;
+
+wsServer.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    const {type, gameState} = data;
+    console.log(data)
+    if(type == 'init'){
+        if(gameState){
+            updateGame(gameState);
+            updatePlayers(gameState.players);
+        }
+    }else if(type == 'start'){
+        if(gameState){
+            isGameStarted = true;
+            updateGame(gameState);
+            startGame(gameState);
+        }
+    }
+}
+// https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/open_event
+wsServer.onopen = () => {
+    wsServer.send(JSON.stringify({type: 'getInit'}));
+};
+
+function updateGame(gameState){
+    game = gameState;
+    currentPlayerIndex = gameState.currentPlayerIndex;
+    players = gameState.players;
+    monsters = gameState.monsters;
+    areas = gameState.areas;
+    monsterTypes = gameState.monsterTypes;
+    console.log(gameState)
+}
+
+function updatePlayers(players){
+    const playerNamesDiv = document.getElementById('player-names');
+    playerNamesDiv.innerHTML = '';
+    for(let i = 0; i< players.length; i++){
+        let index = i+1;
+        playerNamesDiv.innerHTML += `
+            <input type="text" id="player${index}" value="${players[i].name}" readonly>
+        `;
+    }
+    if(players.length < 4){
+        playerNamesDiv.innerHTML += `
+            <div id="waiting"> Waiting for other players to join..</div>
+        `;
+    }else{
+        playerNamesDiv.innerHTML += `
+            <button id="start-game" onclick="onStartGame()">Start Game</button>
+        `;
+    }
+}
+
 document.getElementById('skip-turn').addEventListener('click', skipTurn);
 
 const board = document.querySelector('#board table');
 const playerActions = document.getElementById('player-actions');
 const statusDiv = document.getElementById('status');
 
-let currentPlayerIndex = 0;
-const players = [];
-const monsters = { 1: [], 2: [], 3: [], 4: [] };
-const areas = {
-    1: { startRow: 0, endRow: 4, startCol: 0, endCol: 4 },
-    2: { startRow: 0, endRow: 4, startCol: 5, endCol: 9 },
-    3: { startRow: 5, endRow: 9, startCol: 0, endCol: 4 },
-    4: { startRow: 5, endRow: 9, startCol: 5, endCol: 9 }
-};
-const monsterTypes = {
-    1: { name: 'vampire', icon: '🧛' },
-    2: { name: 'werewolf', icon: '🐺' },
-    3: { name: 'ghost', icon: '👻' }
-};
+function onStartGame(){
+    wsServer.send(JSON.stringify({type: 'onStart'}));
+}
 
-function startGame() {
-    for (let i = 1; i <= 4; i++) {
-        const playerName = document.getElementById(`player${i}`).value.trim();
-        if (!playerName) {
-            alert(`Please enter Player name ${i}`);
-            return;
-        }
-        players.push({ name: playerName, id: i, monsterCount: 0 });
-    }
-
+function startGame(gameState) {
     document.getElementById('player-names').classList.add('hidden');
     document.getElementById('board').classList.remove('hidden');
     document.getElementById('player-actions').classList.remove('hidden');
@@ -37,7 +80,8 @@ function startGame() {
     document.getElementById('combat-rules').classList.remove('hidden');
     
     createBoard();
-    determineFirstPlayer();
+    updateCurrentPlayer();
+    // done on server resetMonsterMovement();
 
     // Hide buttons on the home screen
     document.getElementById('insert-monster').style.display = 'inline-block';
@@ -60,19 +104,17 @@ function createBoard() {
             waterMark.innerText = `${i},${j}`;
             cell.appendChild(waterMark);
 
-            if ((i < 5 && j < 5) || (i >= 5 && j >= 5)) {
+            if ((i < 5 && j < 5)) {
                 cell.classList.add('light-green');
-            } else if ((i < 5 && j >= 5) || (i >= 5 && j < 5)) {
+            } else if((i >= 5 && j >= 5)){
+                cell.classList.add('light-blue');
+            } else if (i < 5 && j >= 5){
+                cell.classList.add('light-gray');
+            }else if  (i >= 5 && j < 5) {
                 cell.classList.add('light-red');
             }
         }
     }
-}
-
-function determineFirstPlayer() {
-    currentPlayerIndex = Math.floor(Math.random() * 4);
-    updateCurrentPlayer();
-    resetMonsterMovement();
 }
 
 function updateCurrentPlayer() {
@@ -249,12 +291,6 @@ function skipTurn() {
     resetMonsterMovement();
 }
 
-function resetMonsterMovement() {
-    monsters[players[currentPlayerIndex].id].forEach(monster => {
-        monster.hasMoved = false;
-    });
-}
-
 function updatePlayerStatus() {
     const statusTableBody = document.querySelector('#status-table tbody');
     statusTableBody.innerHTML = ''; // Clear previous status
@@ -275,6 +311,7 @@ function updatePlayerStatus() {
         statusTableBody.appendChild(row);
     });
 }
+
 
 
 

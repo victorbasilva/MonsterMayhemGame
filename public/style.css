@@ -121,6 +121,13 @@ button:hover {
     background-color: lightcoral;
 }
 
+.light-gray {
+    background-color: lightslategray;
+}
+.light-blue{
+    background-color: lightblue;
+}
+
 .watermark {
     position: absolute;
     font-size: 10px;

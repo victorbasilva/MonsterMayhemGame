@@ -1,20 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="game-title">Monster Mayhem</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="game-container">
-        <h1 id="game-title">Monster Mayhem</h1>
+<%- include("../partials/head.ejs") -%>
         <div id="player-names">
-            <input type="text" id="player1" placeholder="Player 1 Name">
-            <input type="text" id="player2" placeholder="Player 2 Name">
-            <input type="text" id="player3" placeholder="Player 3 Name">
-            <input type="text" id="player4" placeholder="Player 4 Name">
-            <button id="start-game">Start Game</button>
+            
         </div>
         <div id="main-content">
             <div id="board" class="hidden">
@@ -49,7 +35,7 @@
             </div>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="client.js"></script>
 </body>
 </html>
 
