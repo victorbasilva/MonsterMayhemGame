@@ -2,7 +2,6 @@ body {
     background-image: url('monstermayhemgame.jpeg');
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -12,11 +11,11 @@ body {
 
 #game-container {
     text-align: center;
-    background-color: rgba(255, 255, 255, 0.8); /* Adding a semi-transparent background */
+    background-color: rgba(255, 255, 255, 0.8);
     padding: 20px;
-    border-radius: 30px;
-}
+    border-radius: 10px;
 
+}
 /* Define the custom font */
 @font-face {
     font-family: 'MyCustomFont';
@@ -26,9 +25,10 @@ body {
 /* Apply the custom font to the game title */
 #game-title {
     font-family: 'MyCustomFont', sans-serif;
-    color: red;    
+    color: red;
+    font-size: 40px;
+    margin-bottom: 20px;
 }
-
 
 #player-names input[type="text"] {
     margin: 5px;
@@ -48,12 +48,15 @@ body {
     display: none;
 }
 
-#board {
+#main-content {
     display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Align items to the top */
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
+#board {
+    margin-right: 20px;
+}
 
 table {
     margin: 0 auto;
@@ -61,18 +64,17 @@ table {
 }
 
 td {
-    width: 40px; /* Increase cell width */
-    height: 40px; /* Increase cell height */
+    width: 30px;
+    height: 30px;
     border: 1px solid #000;
     text-align: center;
     vertical-align: middle;
     position: relative;
 }
 
-
-
 #player-actions {
     margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 button {
@@ -108,8 +110,7 @@ button:hover {
 #status {
     color: red;
     font-size: 20px;
-    margin-top: 20px; /* Added top spacing for better visualization */
-    margin-left: 20px;
+    margin-top: 20px;
 }
 
 .light-green {
@@ -117,26 +118,25 @@ button:hover {
 }
 
 .light-red {
-    background-color: lightcoral; /* Use lightcoral for a light red color */
+    background-color: lightcoral;
 }
 
 .watermark {
     position: absolute;
     font-size: 10px;
-    color: rgba(0, 0, 0, 0.2); /* black color with 20% opacity */
-    pointer-events: none; /* Ignore clicks on text */
+    color: rgba(0, 0, 0, 0.2);
+    pointer-events: none;
     top: 2px;
     left: 2px;
 }
 
 #player-status {
     margin-left: 20px;
-    margin-top: 20px; /* Add top margin for spacing */
 }
 
 #status-table {
     border-collapse: collapse;
-    width: 100%; /* Make the table take the full width of its container */
+    width: 100%;
     margin-bottom: 20px;
 }
 
@@ -144,6 +144,7 @@ button:hover {
     border: 1px solid #000;
     padding: 8px;
     text-align: center;
+    margin-top: 20px;
 }
 
 #status-table th {
@@ -153,18 +154,6 @@ button:hover {
 #combat-rules {
     text-align: left;
     font-size: 18px;
-    margin-top: 20px; /* Add top margin for spacing */
+    margin-top: 20px;
 }
 
-#player-status {
-    margin-top: 50px; /* Adjust the space above the status table */
-}
-
-#player-actions {
-    margin-top: 20px; /* Add space between the status table and buttons */
-}
-
-#player-actions button {
-    display: block; /* Place the buttons on top of each other */
-    margin: 10px auto; /* Center buttons horizontally */
-}

@@ -16,29 +16,32 @@
             <input type="text" id="player4" placeholder="Player 4 Name">
             <button id="start-game">Start Game</button>
         </div>
-        <div id="board" class="hidden">
-            <table></table>
-            <div id="status" class="status"></div>
-            <div id="player-actions" class="hidden">
-                <button id="insert-monster">Add Monster</button>
-                <button id="move-monster">Move Monster</button>
-                <button id="skip-turn">Skip Turn</button>  
+        <div id="main-content">
+            <div id="board" class="hidden">
+                <table></table>
             </div>
-            <div id="player-status">
-                <table id="status-table">
-                    <thead> <!-- Hide the table header (suppose to hide only at the home screen - it needs to show
-                        after we hit start game and place 1 monster at least as a header of the game status table) -->
-                        <tr>
-                            <th>Player</th>
-                            <th>Monsters</th>
-                            <th>Eliminated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Player status will be dynamically inserted here -->
-                    </tbody>
-                </table>
-                <div id="combat-rules" class="hidden"> <!-- Hide combat rules -->
+            <div id="sidebar">
+                <div id="status" class="status"></div>
+                <div id="player-actions" class="hidden">
+                    <button id="insert-monster">Add Monster</button>
+                    <button id="move-monster">Move Monster</button>
+                    <button id="skip-turn">Skip Turn</button>
+                </div>
+                <div id="player-status" class="hidden">
+                    <table id="status-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Monsters</th>
+                                <th>Eliminated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Player status will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="combat-rules" class="hidden">
                     <p>🧛 X 🐺 = 🧛</p>
                     <p>🐺 X 👻 = 🐺</p>
                     <p>👻 X 🧛 = 👻</p>
@@ -49,6 +52,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
