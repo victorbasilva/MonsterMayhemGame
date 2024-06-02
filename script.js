@@ -20,7 +20,6 @@ const monsterTypes = {
     3: { name: 'ghost', icon: '👻' }
 };
 
-
 function startGame() {
     for (let i = 1; i <= 4; i++) {
         const playerName = document.getElementById(`player${i}`).value.trim();
@@ -46,9 +45,6 @@ function startGame() {
     document.getElementById('skip-turn').style.display = 'inline-block';
 }
 
-
-
-
 function createBoard() {
     for (let i = 0; i < 10; i++) {
         const row = board.insertRow();
@@ -73,10 +69,10 @@ function createBoard() {
     }
 }
 
-
 function determineFirstPlayer() {
     currentPlayerIndex = Math.floor(Math.random() * 4);
     updateCurrentPlayer();
+    resetMonsterMovement();
 }
 
 function updateCurrentPlayer() {
@@ -122,19 +118,14 @@ function insertMonster(player, row, col) {
     cell.dataset.type = monsterType;
 
     player.monsterCount++;
-    updatePlayerStatus(); // Update player status
-    endTurn();
-}
+    monsters[player.id].push({ row, col, hasMoved: false }); // Add the monster with hasMoved = false
 
-function endTurn() {
-    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-    updateCurrentPlayer();
+    updatePlayerStatus(); // Update player status
 }
 
 document.getElementById('move-monster').addEventListener('click', () => {
     const currentPlayer = players[currentPlayerIndex];
-    const monsterCells = Array.from(board.getElementsByTagName('td'))
-        .filter(cell => cell.dataset.player == currentPlayer.id);
+    const monsterCells = monsters[currentPlayer.id].filter(monster => !monster.hasMoved);
 
     if (monsterCells.length === 0) {
         alert('No monsters to move!');
@@ -144,12 +135,12 @@ document.getElementById('move-monster').addEventListener('click', () => {
     let monsterOptions = 'Choose a monster to move:\n';
     const monstersToMove = [];
 
-    monsterCells.forEach((cell, index) => {
-        const row = cell.dataset.row;
-        const col = cell.dataset.col;
-        const monsterType = monsterTypes[parseInt(cell.dataset.type)].name;
+    monsterCells.forEach((monster, index) => {
+        const row = monster.row;
+        const col = monster.col;
+        const monsterType = monsterTypes[parseInt(board.rows[row].cells[col].dataset.type)].name;
         monsterOptions += `${index + 1}. ${monsterType} at (${row}, ${col})\n`;
-        monstersToMove.push({ cell, row, col });
+        monstersToMove.push(monster);
     });
 
     const choice = parseInt(prompt(monsterOptions)) - 1;
@@ -200,8 +191,68 @@ function moveMonster(player, fromRow, fromCol, toRow, toCol) {
         toCell.dataset.type = monsterType;
     }
 
+    const movedMonster = monsters[player.id].find(monster => monster.row === fromRow && monster.col === fromCol);
+    movedMonster.row = toRow;
+    movedMonster.col = toCol;
+    movedMonster.hasMoved = true; // Mark as moved
+
     updatePlayerStatus(); // Update player status
-    endTurn();
+}
+
+
+
+function handleCombat(cell, attackingMonsterType) {
+    const defendingPlayerId = parseInt(cell.dataset.player);
+    const defendingMonsterType = parseInt(cell.dataset.type);
+
+    const attackingMonster = monsterTypes[attackingMonsterType];
+    const defendingMonster = monsterTypes[defendingMonsterType];
+
+    if (!attackingMonster || !defendingMonster) {
+        alert('Invalid monster types for combat!');
+        return;
+    }
+
+    const attackingMonsterName = attackingMonster.name;
+    const defendingMonsterName = defendingMonster.name;
+
+    const combatRules = {
+        'vampire': { 'werewolf': 'lose', 'ghost': 'win' },
+        'werewolf': { 'ghost': 'lose', 'vampire': 'win' },
+        'ghost': { 'vampire': 'lose', 'werewolf': 'win' }
+    };
+
+    const combatResult = combatRules[attackingMonsterName][defendingMonsterName];
+
+    if (combatResult === 'win') {
+        alert(`${attackingMonsterName} wins against ${defendingMonsterName}!`);
+        removeMonsterFromList(defendingPlayerId, cell.dataset.row, cell.dataset.col);
+        cell.innerText = monsterTypes[attackingMonsterType].icon;
+        cell.dataset.player = players[currentPlayerIndex].id;
+        cell.dataset.type = attackingMonsterType;
+    } else {
+        alert(`${defendingMonsterName} wins against ${attackingMonsterName}!`);
+        removeMonsterFromList(players[currentPlayerIndex].id, cell.dataset.row, cell.dataset.col);
+        cell.innerText = monsterTypes[defendingMonsterType].icon;
+        cell.dataset.player = defendingPlayerId;
+        cell.dataset.type = defendingMonsterType;
+    }
+}
+
+function removeMonsterFromList(playerId, row, col) {
+    monsters[playerId] = monsters[playerId].filter(monster => monster.row != row || monster.col != col);
+}
+
+function skipTurn() {
+    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    updateCurrentPlayer();
+    resetMonsterMovement();
+}
+
+function resetMonsterMovement() {
+    monsters[players[currentPlayerIndex].id].forEach(monster => {
+        monster.hasMoved = false;
+    });
 }
 
 function updatePlayerStatus() {
@@ -225,57 +276,5 @@ function updatePlayerStatus() {
     });
 }
 
-function handleCombat(cell, incomingMonsterType) {
-    const defendingMonsterType = parseInt(cell.dataset.type);
-    const defendingPlayerId = parseInt(cell.dataset.player);
-
-    if ((incomingMonsterType === 1 && defendingMonsterType === 2) ||
-        (incomingMonsterType === 2 && defendingMonsterType === 3) ||
-        (incomingMonsterType === 3 && defendingMonsterType === 1)) {
-        cell.innerText = monsterTypes[incomingMonsterType].icon;
-        cell.dataset.player = players[currentPlayerIndex].id;
-        cell.dataset.type = incomingMonsterType;
-        decrementMonsterCount(defendingPlayerId);
-    } else if (incomingMonsterType === defendingMonsterType) {
-        cell.innerText = '';
-        cell.dataset.player = '';
-        cell.dataset.type = '';
-        decrementMonsterCount(defendingPlayerId);
-        decrementMonsterCount(players[currentPlayerIndex].id);
-    } else {
-        decrementMonsterCount(players[currentPlayerIndex].id);
-    }
-
-    updatePlayerStatus(); // Update player status
-}
-
-function decrementMonsterCount(playerId) {
-    const player = players.find(p => p.id === playerId);
-    player.monsterCount--;
-    player.eliminatedCount = (player.eliminatedCount || 0) + 1;
-
-    if (player.monsterCount <= 0) {
-        alert(`${player.name} was eliminated!`);
-        players.splice(players.indexOf(player), 1);
-        if (players.length === 1) {
-            alert(`${players[0].name} won the game!`);
-            resetGame();
-        }
-    }
-
-    updatePlayerStatus(); // Update player status
-}
-
-function resetGame() {
-    location.reload();
-    // Display buttons on home screen when restarting the game
-    document.getElementById('insert-monster').style.display = 'none';
-    document.getElementById('move-monster').style.display = 'none';
-    document.getElementById('skip-turn').style.display = 'none';
-}
-
-function skipTurn() {
-    endTurn();
-}
 
 
