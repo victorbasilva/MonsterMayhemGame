@@ -133,16 +133,18 @@ function renderBoard(gameState){
                 cell.classList.add('light-red');
             }
 
-            // Add monster icon if present
+            // Add monster icon and background for each player
             const cellData = game.board[i][j];
             if (cellData) {
-                cell.innerText = game.monsterTypes[cellData.monsterType].icon;
+                const playerColor = `player-${cellData.playerId}`;
+                cell.innerHTML = `<span class="${playerColor}">${game.monsterTypes[cellData.monsterType].icon}</span>`;
                 cell.dataset.player = cellData.playerId;
                 cell.dataset.type = cellData.monsterType;
             }
         }
     }    
 }
+
 
 function updateCurrentPlayer() {
     const currentPlayer = players[currentPlayerIndex];
@@ -370,6 +372,43 @@ function updatePlayerStatus() {
         statusTableBody.appendChild(row);
     });
 }
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    const players = []; // Array que armazenará os jogadores
+
+    // Exemplo de função para adicionar um jogador (você deve adaptar isso para a lógica do seu jogo)
+    function addPlayer(playerName, playerColorClass) {
+        players.push({ name: playerName, colorClass: playerColorClass });
+        updatePlayerList();
+    }
+
+    // Função que atualiza a tabela com os jogadores
+    function updatePlayerList() {
+        const playerList = document.getElementById('player-list');
+        playerList.innerHTML = ''; // Limpa a lista existente
+
+        players.forEach(player => {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = player.name;
+            row.appendChild(nameCell);
+
+            const colorCell = document.createElement('td');
+            colorCell.className = player.colorClass;
+            row.appendChild(colorCell);
+
+            playerList.appendChild(row);
+        });
+    }
+
+    // Exemplo de jogadores (você deve adicionar os jogadores de acordo com sua lógica)
+    addPlayer('Player 1', 'player-1');
+    addPlayer('Player 2', 'player-2');
+    addPlayer('Player 3', 'player-3');
+    addPlayer('Player 4', 'player-4');
+});
+
 
 
 

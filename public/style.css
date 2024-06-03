@@ -166,3 +166,58 @@ button:hover {
     margin-top: 20px;
 }
 
+/* Player's monsters background colors */
+.player-1 {
+    background-color: rgba(255, 0, 0, 0.5); /* Red */
+    padding: 5px; 
+}
+
+.player-2 {
+    background-color: rgba(0, 255, 0, 0.5); /* Green */
+    padding: 5px; 
+}
+
+.player-3 {
+    background-color: rgba(0, 0, 255, 0.5); /* Blue */
+    padding: 5px; 
+}
+
+.player-4 {
+    background-color: rgba(255, 255, 0, 0.5); /* Yellow */
+    padding: 5px; 
+}
+
+
+/* Table styles */
+#player-colors table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#player-colors th, #player-colors td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+}
+
+#player-colors th {
+    background-color: #f2f2f2;
+}
+
+/* Square's colors */
+.player-1 {
+    background-color: rgba(255, 0, 0, 1); /* Red */
+}
+
+.player-2 {
+    background-color: rgba(0, 255, 0, 1); /* Green */
+}
+
+.player-3 {
+    background-color: rgba(0, 0, 255, 1); /* Blue */
+}
+
+.player-4 {
+    background-color: rgba(255, 255, 0, 1); /* Yellow */
+}
