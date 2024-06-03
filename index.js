@@ -238,4 +238,3 @@ app.post("/enter-game", (req, res) => {
     req.session.name = name;
     res.redirect("/index");
 });
-
