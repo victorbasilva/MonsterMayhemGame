@@ -374,18 +374,18 @@ function updatePlayerStatus() {
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    const players = []; // Array que armazenará os jogadores
+    const players = []; // Array that stores the players
 
-    // Exemplo de função para adicionar um jogador (você deve adaptar isso para a lógica do seu jogo)
+    // Example function to add a player (must be adapted to the game logic)
     function addPlayer(playerName, playerColorClass) {
         players.push({ name: playerName, colorClass: playerColorClass });
         updatePlayerList();
     }
 
-    // Função que atualiza a tabela com os jogadores
+    // Function that updates the table with players
     function updatePlayerList() {
         const playerList = document.getElementById('player-list');
-        playerList.innerHTML = ''; // Limpa a lista existente
+        playerList.innerHTML = ''; // Clears the existing list
 
         players.forEach(player => {
             const row = document.createElement('tr');
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    // Exemplo de jogadores (você deve adicionar os jogadores de acordo com sua lógica)
+    // Example of players (must add the players according to the logic)
     addPlayer('Player 1', 'player-1');
     addPlayer('Player 2', 'player-2');
     addPlayer('Player 3', 'player-3');
