@@ -15,6 +15,17 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false } 
 }));
+
+app.post("/enter-game", (req, res) => {
+    const name = req.body.name;
+    if (name.length < 6) {
+        res.status(400).send("Name must be at least 6 characters long.");
+        return;
+    }
+    req.session.name = name;
+    res.redirect("/index");
+});
+
 const httpServer = app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
