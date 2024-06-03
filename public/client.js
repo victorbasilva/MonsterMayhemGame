@@ -133,16 +133,18 @@ function renderBoard(gameState){
                 cell.classList.add('light-red');
             }
 
-            // Add monster icon if present
+            // Add monster icon and background for each player
             const cellData = game.board[i][j];
             if (cellData) {
-                cell.innerText = game.monsterTypes[cellData.monsterType].icon;
+                const playerColor = `player-${cellData.playerId}`;
+                cell.innerHTML = `<span class="${playerColor}">${game.monsterTypes[cellData.monsterType].icon}</span>`;
                 cell.dataset.player = cellData.playerId;
                 cell.dataset.type = cellData.monsterType;
             }
         }
     }    
 }
+
 
 function updateCurrentPlayer() {
     const currentPlayer = players[currentPlayerIndex];

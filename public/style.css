@@ -166,3 +166,24 @@ button:hover {
     margin-top: 20px;
 }
 
+/* Ajuste as seguintes regras de estilo */
+.player-1 {
+    background-color: rgba(255, 0, 0, 0.5); /* Vermelho */
+    padding: 5px; /* Ajuste o padding conforme necessário */
+}
+
+.player-2 {
+    background-color: rgba(0, 255, 0, 0.5); /* Verde */
+    padding: 5px; /* Ajuste o padding conforme necessário */
+}
+
+.player-3 {
+    background-color: rgba(0, 0, 255, 0.5); /* Azul */
+    padding: 5px; /* Ajuste o padding conforme necessário */
+}
+
+.player-4 {
+    background-color: rgba(255, 255, 0, 0.5); /* Amarelo */
+    padding: 5px; /* Ajuste o padding conforme necessário */
+}
+
