@@ -9,6 +9,8 @@ let monsters;
 let areas;
 let monsterTypes;
 let isGameStarted = false;
+let isMonsterSelected = false;
+let monsterCellData = null;
 
 wsServer.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -24,12 +26,19 @@ wsServer.onmessage = (event) => {
             isGameStarted = true;
             updateGame(gameState);
             startGame(gameState);
+            renderBoard();
         }
+    }else if(type == 'update'){
+        updateGame(gameState);
+        renderBoard();
+    }else if(type == 'skipTurn'){
+        updateGame(gameState);
+        updateCurrentPlayer();
     }
 }
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/open_event
 wsServer.onopen = () => {
-    wsServer.send(JSON.stringify({type: 'getInit'}));
+    wsServer.send(JSON.stringify({type: 'getInit', }));
 };
 
 function updateGame(gameState){
@@ -72,6 +81,10 @@ function onStartGame(){
     wsServer.send(JSON.stringify({type: 'onStart'}));
 }
 
+function skipTurn() {
+    wsServer.send(JSON.stringify({type: 'onSkipTurn'}));
+}
+
 function startGame(gameState) {
     document.getElementById('player-names').classList.add('hidden');
     document.getElementById('board').classList.remove('hidden');
@@ -79,17 +92,22 @@ function startGame(gameState) {
     document.getElementById('player-status').classList.remove('hidden');
     document.getElementById('combat-rules').classList.remove('hidden');
     
-    createBoard();
     updateCurrentPlayer();
-    // done on server resetMonsterMovement();
-
+    
     // Hide buttons on the home screen
     document.getElementById('insert-monster').style.display = 'inline-block';
     document.getElementById('move-monster').style.display = 'inline-block';
     document.getElementById('skip-turn').style.display = 'inline-block';
+
+    const gamePlayerDiv = document.getElementById('game-player');
+    gamePlayerDiv.classList.remove('hidden');
+    gamePlayerDiv.innerHTML = `<div class="game-player-text">${gamePlayer.name}</div>`;
 }
 
-function createBoard() {
+function renderBoard(gameState){
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    console.log('renderBoard')
     for (let i = 0; i < 10; i++) {
         const row = board.insertRow();
         for (let j = 0; j < 10; j++) {
@@ -104,6 +122,7 @@ function createBoard() {
             waterMark.innerText = `${i},${j}`;
             cell.appendChild(waterMark);
 
+            // Adding colors based on position
             if ((i < 5 && j < 5)) {
                 cell.classList.add('light-green');
             } else if((i >= 5 && j >= 5)){
@@ -113,8 +132,16 @@ function createBoard() {
             }else if  (i >= 5 && j < 5) {
                 cell.classList.add('light-red');
             }
+
+            // Add monster icon if present
+            const cellData = game.board[i][j];
+            if (cellData) {
+                cell.innerText = game.monsterTypes[cellData.monsterType].icon;
+                cell.dataset.player = cellData.playerId;
+                cell.dataset.type = cellData.monsterType;
+            }
         }
-    }
+    }    
 }
 
 function updateCurrentPlayer() {
@@ -125,47 +152,83 @@ function updateCurrentPlayer() {
 }
 
 function handleCellClick(event) {
-    const cell = event.target;
+    const cell = event.target.closest('td');
     const row = parseInt(cell.dataset.row);
     const col = parseInt(cell.dataset.col);
-    const currentPlayer = players[currentPlayerIndex];
+    const currentPlayer = game.players[game.currentPlayerIndex];
+    if (gamePlayer.name !== currentPlayer.name) {
+        alert('It is not your turn!');
+        return;
+    }
+    
+    if (cell.dataset.player && cell.dataset.type) {
+        const selectedPlayerId = parseInt(cell.dataset.player);
+        const selectedMonsterType = parseInt(cell.dataset.type);
+         // Check if the clicked monster belongs to the current player
+         if (selectedPlayerId === currentPlayer.id) {
+            // if is selected and we click again
+            if(isMonsterSelected){
+                alert(`You need to move your monster first!`);
+                return;
+            }
+            //alert(`You selected your ${game.monsterTypes[selectedMonsterType].name}!`);
+            isMonsterSelected = true;
+            monsterCellData = cell.dataset;
+            cell.classList.add('selected'); // Add a class to indicate selection
+        } else{
+            if(!isMonsterSelected){
+                // add attack enemy monster logic
+                cell.classList.remove('selected');
+            }else{
+                // The clicked monster belongs to another player, so do nothing
+                alert('You cannot select a monster that belongs to another player!');
+            }
+        }
+    }else{
+        // if is empty board
+        if(isMonsterSelected){
+            // Move the selected monster to the clicked cell
+            wsServer.send(JSON.stringify({
+                type: 'moveMonster',
+                playerId: currentPlayer.id,
+                fromRow: parseInt(monsterCellData.row),
+                fromCol: parseInt(monsterCellData.col),
+                toRow: row,
+                toCol: col
+            }));
+            isMonsterSelected = false; // Reset monster selection
+            cell.classList.remove('selected'); // remove class
+        }else{
+            //handle monster placement
+            if (isValidInsertion(currentPlayer.id, row, col)) {
+                const monsterType = parseInt(prompt('Choose a monster to place: 1 (vampire), 2 (werewolf), 3 (ghost)'));
+                if (!game.monsterTypes[monsterType]) {
+                    alert('Invalid monster type!');
+                    return;
+                }
+        
+                wsServer.send(JSON.stringify({
+                    type: 'insertMonster',
+                    playerId: currentPlayer.id,
+                    row: row,
+                    col: col,
+                    monsterType: monsterType
+                }));
+            } else {
+                alert('You can only insert monsters within your area!');
+            }
+        }
 
-    if (isValidInsertion(currentPlayer, row, col)) {
-        insertMonster(currentPlayer, row, col);
-    } else {
-        alert('You can only insert monsters within your area!');
     }
 }
 
-function isValidInsertion(player, row, col) {
-    const area = areas[player.id];
+function isValidInsertion(playerId, row, col) {
+    const area = game.areas[playerId];
     return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
+
 }
 
-function insertMonster(player, row, col) {
-    const monsterType = parseInt(prompt('Choose a monster to place: 1 (vampire), 2 (werewolf), 3 (ghost)'));
-    if (!monsterTypes[monsterType]) {
-        alert('Invalid monster type!');
-        return;
-    }
-
-    const cell = board.rows[row].cells[col];
-    if (cell.dataset.player) {
-        alert('Cell already occupied!');
-        return;
-    }
-
-    cell.innerText = monsterTypes[monsterType].icon;
-    cell.dataset.player = player.id;
-    cell.dataset.type = monsterType;
-
-    player.monsterCount++;
-    monsters[player.id].push({ row, col, hasMoved: false }); // Add the monster with hasMoved = false
-
-    updatePlayerStatus(); // Update player status
-}
-
-document.getElementById('move-monster').addEventListener('click', () => {
+/*document.getElementById('move-monster').addEventListener('click', () => {
     const currentPlayer = players[currentPlayerIndex];
     const monsterCells = monsters[currentPlayer.id].filter(monster => !monster.hasMoved);
 
@@ -198,7 +261,7 @@ document.getElementById('move-monster').addEventListener('click', () => {
     const toCol = parseInt(prompt('To column:'));
 
     moveMonster(currentPlayer, fromRow, fromCol, toRow, toCol);
-});
+});*/
 
 function moveMonster(player, fromRow, fromCol, toRow, toCol) {
     const fromCell = board.rows[fromRow].cells[fromCol];
@@ -285,11 +348,7 @@ function removeMonsterFromList(playerId, row, col) {
     monsters[playerId] = monsters[playerId].filter(monster => monster.row != row || monster.col != col);
 }
 
-function skipTurn() {
-    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-    updateCurrentPlayer();
-    resetMonsterMovement();
-}
+
 
 function updatePlayerStatus() {
     const statusTableBody = document.querySelector('#status-table tbody');

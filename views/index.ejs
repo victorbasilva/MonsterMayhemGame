@@ -3,10 +3,9 @@
             
         </div>
         <div id="main-content">
-            <div id="board" class="hidden">
-                <table></table>
-            </div>
+            <table id="board" class="hidden"></table>
             <div id="sidebar">
+                <div id="game-player" class="player hidden"></div>
                 <div id="status" class="status"></div>
                 <div id="player-actions" class="hidden">
                     <button id="insert-monster">Add Monster</button>
@@ -36,6 +35,9 @@
         </div>
     </div>
     <script src="client.js"></script>
+    <script>
+        const gamePlayer = <%- JSON.stringify(player) %>;
+    </script>
 </body>
 </html>
 

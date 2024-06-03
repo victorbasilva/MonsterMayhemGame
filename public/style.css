@@ -127,7 +127,9 @@ button:hover {
 .light-blue{
     background-color: lightblue;
 }
-
+.selected{
+    box-shadow: inset 0px 0px 3px 3px #a9ff00;
+}
 .watermark {
     position: absolute;
     font-size: 10px;
