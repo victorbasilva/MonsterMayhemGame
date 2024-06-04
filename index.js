@@ -47,6 +47,8 @@ gameState.areas = areas;
 gameState.monsterTypes = monsterTypes;
 gameState.players;
 gameState.board = Array.from({ length: 10 }, () => Array(10).fill(null));
+gameState.currentPlayerIndex = currentPlayerIndex;
+gameState. started = false;
 
 wsServer.on('connection', (ws, req) => {
     console.log('A user connected');
@@ -113,6 +115,20 @@ wsServer.on('connection', (ws, req) => {
                     client.send(JSON.stringify({ type: 'update', gameState }));
                 }
             });
+        }else if(type=="attackMonster"){
+            const { playerId, fromRow, fromCol, toRow, toCol } = data;
+             // Check if the move is valid
+            if (isValidMove(playerId, fromRow, fromCol, toRow, toCol, true)) {
+                gameState = handleAttackMonster(data);
+                wsServer.clients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify({ type: 'update', gameState }));
+                    }
+                });
+            } else {
+                // Invalid move, send error message to client
+                ws.send(JSON.stringify({ type: 'error', message: 'Invalid move!' }));
+            }
         }
     });
      
@@ -152,43 +168,114 @@ function resetMonsterMovement(gameState, currentPlayerIndex){
 function getRandomPlayerIndex(){
     return Math.floor(Math.random() * 4);
 }
-function isValidMove(playerId, fromRow, fromCol, toRow, toCol) {
-    // Check if the target cell is empty or contains the player's monster
+
+function isValidMove(playerId, fromRow, fromCol, toRow, toCol, isAttack = false) {
+    // Check if the move is within bounds
+    if (!isInBounds(toRow, toCol)) {
+        return false;
+    }
+
     const targetCell = gameState.board[toRow][toCol];
-    if (!targetCell || targetCell.playerId === playerId) {
-        // Check if the move is horizontal, vertical, or diagonal
-        if (fromRow === toRow || fromCol === toCol || Math.abs(toRow - fromRow) === Math.abs(toCol - fromCol)) {
-            const rowIncrement = Math.sign(toRow - fromRow);
-            const colIncrement = Math.sign(toCol - fromCol);
 
-            let currentRow = fromRow + rowIncrement;
-            let currentCol = fromCol + colIncrement;
+    if (!isAttack) {
+        // For normal moves, the target cell must be empty or contain the player's own monster
+        if (targetCell && targetCell.playerId !== playerId) {
+            return false; // Path blocked by another player's monster
+        }
+    } else {
+        // For attack moves, the target cell must contain an enemy monster
+        if (!targetCell || targetCell.playerId === playerId) {
+            return false; // No enemy monster to attack
+        }
+    }
 
-            // Iterate over the path between the starting and target positions
-            while (currentRow !== toRow || currentCol !== toCol) {
-                // Check if the current cell is within bounds
-                if (currentRow < 0 || currentRow >= 10 || currentCol < 0 || currentCol >= 10) {
-                    return false; // Out of bounds
-                }
+    // Check if the move is horizontal, vertical, or diagonal within 2 squares
+    const rowDiff = Math.abs(toRow - fromRow);
+    const colDiff = Math.abs(toCol - fromCol);
 
-                // Check if the current cell contains the player's monster
-                if (gameState.board[currentRow][currentCol] && gameState.board[currentRow][currentCol].playerId !== playerId) {
-                    return false; // Path blocked by another player's monster
-                }
+    if ((fromRow === toRow || fromCol === toCol) || (rowDiff === colDiff && rowDiff <= 2)) {
+        const rowIncrement = Math.sign(toRow - fromRow);
+        const colIncrement = Math.sign(toCol - fromCol);
 
-                // Move to the next cell
-                currentRow += rowIncrement;
-                currentCol += colIncrement;
+        let currentRow = fromRow + rowIncrement;
+        let currentCol = fromCol + colIncrement;
+
+        // Iterate over the path between the starting and target positions
+        while (currentRow !== toRow || currentCol !== toCol) {
+            // Check if the current cell is within bounds
+            if (currentRow < 0 || currentRow >= 10 || currentCol < 0 || currentCol >= 10) {
+                return false; // Out of bounds
             }
 
-            return true; // Valid move
+            // Check if the current cell contains another player's monster
+            if (gameState.board[currentRow][currentCol] && gameState.board[currentRow][currentCol].playerId !== playerId) {
+                return false; // Path blocked by another player's monster
+            }
+
+            // Move to the next cell
+            currentRow += rowIncrement;
+            currentCol += colIncrement;
         }
+
+        return true; // Valid move
     }
 
     return false; // Invalid move
 }
 
 
+
+function handleAttackMonster(data) {
+    const { playerId, fromRow, fromCol, toRow, toCol } = data;
+    const attackingMonster = gameState.board[fromRow][fromCol];
+    const defendingMonster = gameState.board[toRow][toCol];
+
+    if (!attackingMonster || !defendingMonster) {
+        console.log('Invalid attack: one of the monsters does not exist.');
+        return gameState; // Return gameState even if no changes are made
+    }
+
+    const attackType = gameState.monsterTypes[attackingMonster.monsterType].name;
+    const defendType = gameState.monsterTypes[defendingMonster.monsterType].name;
+
+    const combatRules = {
+        'vampire': { 'werewolf': 'win', 'ghost': 'lose' },
+        'werewolf': { 'ghost': 'win', 'vampire': 'lose' },
+        'ghost': { 'vampire': 'win', 'werewolf': 'lose' }
+    };
+
+    const result = combatRules[attackType][defendType];
+
+    if (result === 'win') {
+        // Attacking monster wins
+        gameState.board[toRow][toCol] = attackingMonster;
+        gameState.board[fromRow][fromCol] = null;
+        removeMonster(defendingMonster.playerId, toRow, toCol);
+        updatePlayerMonsterCount(defendingMonster.playerId, -1);
+    } else if (result === 'lose') {
+        // Defending monster wins
+        removeMonster(attackingMonster.playerId, fromRow, fromCol);
+        updatePlayerMonsterCount(attackingMonster.playerId, -1);
+    } else {
+        // Handle draw case if applicable
+        console.log('Draw case: No monster wins.');
+    }
+
+    return gameState; // Return the updated game state
+}
+
+function updatePlayerMonsterCount(playerId, change) {
+    const player = gameState.players.find(p => p.id === playerId);
+    if (player) {
+        player.alive += change;
+    }
+}
+
+function removeMonster(playerId, row, col) {
+    const monsters = gameState.monsters[playerId];
+    gameState.monsters[playerId] = monsters.filter(m => m.row !== row || m.col !== col);
+    gameState.board[row][col] = null;
+}
 
 
 function isInBounds(row, col) {

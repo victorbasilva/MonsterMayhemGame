@@ -34,6 +34,8 @@ wsServer.onmessage = (event) => {
     }else if(type == 'skipTurn'){
         updateGame(gameState);
         updateCurrentPlayer();
+    }else if (type == 'error'){
+        alert(data.message);
     }
 }
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/open_event
@@ -178,12 +180,22 @@ function handleCellClick(event) {
             monsterCellData = cell.dataset;
             cell.classList.add('selected'); // Add a class to indicate selection
         } else{
+            // if monster is not selected, prevent selecting monster from other player
             if(!isMonsterSelected){
-                // add attack enemy monster logic
-                cell.classList.remove('selected');
-            }else{
                 // The clicked monster belongs to another player, so do nothing
                 alert('You cannot select a monster that belongs to another player!');
+            }else{
+                // add attack enemy monster logic
+                wsServer.send(JSON.stringify({
+                    type: 'attackMonster',
+                    playerId: currentPlayer.id,
+                    fromRow: parseInt(monsterCellData.row),
+                    fromCol: parseInt(monsterCellData.col),
+                    toRow: row,
+                    toCol: col
+                }));
+                cell.classList.remove('selected');
+                isMonsterSelected = false;
             }
         }
     }else{
