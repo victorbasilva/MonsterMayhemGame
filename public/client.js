@@ -1,7 +1,6 @@
 const url = "ws://localhost:3000";
 const wsServer = new WebSocket(url);
 
-;
 let game;
 let currentPlayer;
 let currentPlayerIndex;
@@ -18,23 +17,20 @@ wsServer.onmessage = (event) => {
     const {type, gameState} = data;
     console.log(data)
     if(type == 'init'){
-        if(gameState){
-            updateGame(gameState);
-            updatePlayers(gameState.players);
-        }
+        updateGame(gameState);
+        updatePlayers(gameState.players);
     }else if(type == 'start'){
-        if(gameState){
-            isGameStarted = true;
-            updateGame(gameState);
-            startGame(gameState);
-            renderBoard();
-        }
+        isGameStarted = true;
+        updateGame(gameState);
+        startGame(gameState);
+        renderBoard();
     }else if(type == 'update'){
         updateGame(gameState);
         renderBoard();
     }else if(type == 'skipTurn'){
         updateGame(gameState);
         updateCurrentPlayer();
+        renderBoard(gameState);
     }else if (type == 'error'){
         alert(data.message);
     }
@@ -53,17 +49,15 @@ function updateGame(gameState){
     monsterTypes = gameState.monsterTypes;
     currentPlayer = players[currentPlayerIndex];
     updatePlayerList(players);
+    //updatePlayerStatus();
     // update current game player with values from server after each game update
-    updateGamePlayer(players);
-}
-
-function updateGamePlayer(players){
     gamePlayer = players.find(player=> player.id == gamePlayer.id);
     if(gamePlayer.alive == 0){
         alert('Game over! You lost all your monsters!');
         return;
     }
 }
+
 
 function updatePlayers(players){
     const playerNamesDiv = document.getElementById('player-names');
@@ -107,7 +101,7 @@ function startGame(gameState) {
     document.getElementById('player-names').classList.add('hidden');
     document.getElementById('board').classList.remove('hidden');
     document.getElementById('player-actions').classList.remove('hidden');
-    document.getElementById('player-status').classList.remove('hidden');
+    //document.getElementById('player-status').classList.remove('hidden');
     document.getElementById('combat-rules').classList.remove('hidden');
     
     updateCurrentPlayer();
@@ -124,7 +118,7 @@ function startGame(gameState) {
 function renderBoard(gameState){
     const board = document.getElementById('board');
     board.innerHTML = '';
-    console.log('renderBoard')
+    
     for (let i = 0; i < 10; i++) {
         const row = board.insertRow();
         for (let j = 0; j < 10; j++) {
@@ -157,6 +151,14 @@ function renderBoard(gameState){
                 cell.innerHTML = `<span class="${playerColor}">${game.monsterTypes[cellData.monsterType].icon}</span>`;
                 cell.dataset.player = cellData.playerId;
                 cell.dataset.type = cellData.monsterType;
+                // Check if the monster has already moved
+                if (cellData.hasMoved) {
+                    cell.classList.add('has-moved');
+                    cell.removeEventListener('click', handleCellClick);
+                }else{
+                    cell.classList.remove('has-moved');
+                    cell.addEventListener('click', handleCellClick);
+                }
             }
         }
     }    
@@ -175,10 +177,20 @@ function handleCellClick(event) {
     const row = parseInt(cell.dataset.row);
     const col = parseInt(cell.dataset.col);
     const currentPlayer = game.players[game.currentPlayerIndex];
+   
     if (gamePlayer.name !== currentPlayer.name) {
         alert('It is not your turn!');
         return;
     }
+    if(game){
+        const cellData = game.board[row][col];
+        // Prevent selection if the monster has already moved
+        if (cellData && cellData.hasMoved) {
+            alert('This monster has already moved this turn.');
+            return;
+        }
+    }
+   
     
     if (cell.dataset.player && cell.dataset.type) {
         const selectedPlayerId = parseInt(cell.dataset.player);
@@ -262,7 +274,7 @@ function isValidInsertion(playerId, row, col) {
 }
 
 
-function updatePlayerStatus() {
+/*function updatePlayerStatus() {
     const statusTableBody = document.querySelector('#status-table tbody');
     statusTableBody.innerHTML = ''; // Clear previous status
 
@@ -281,7 +293,7 @@ function updatePlayerStatus() {
         row.appendChild(eliminatedCountCell);
         statusTableBody.appendChild(row);
     });
-}
+}*/
 
 function updatePlayerList(players) {
     const playerList = document.getElementById('player-list');

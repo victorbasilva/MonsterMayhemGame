@@ -59,6 +59,7 @@ wsServer.on('connection', (ws, req) => {
             wsServer.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify({type:'init', gameState}));
+                    
                 }
             })
         } else if(type == 'onStart'){
@@ -91,14 +92,12 @@ wsServer.on('connection', (ws, req) => {
            
             // Check if the move is valid
             if (isValidMove(playerId, fromRow, fromCol, toRow, toCol)) {
-                console.log('isValidMove')
                 // Move the monster
                 gameState.board[toRow][toCol] = gameState.board[fromRow][fromCol];
                 gameState.board[fromRow][fromCol] = null;
 
                 // Update monster position
                 const movedMonsterIndex = gameState.monsters[playerId].findIndex(monster => monster.row === fromRow && monster.col === fromCol);
-                console.log(movedMonsterIndex)
                 if (movedMonsterIndex !== -1) {
                     gameState.monsters[playerId][movedMonsterIndex].row = toRow;
                     gameState.monsters[playerId][movedMonsterIndex].col = toCol;
@@ -106,9 +105,8 @@ wsServer.on('connection', (ws, req) => {
                 }
             } else {
                 // Invalid move, send error message to client
-                ws.send(JSON.stringify({ type: 'error', message: 'Invalid move!' }));
+                ws.send(JSON.stringify({ type: 'error',message:'Invalid move!' }));
             }
-            console.log(gameState)
             // Send updated game state to all clients
             wsServer.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
@@ -127,7 +125,8 @@ wsServer.on('connection', (ws, req) => {
                 });
             } else {
                 // Invalid move, send error message to client
-                ws.send(JSON.stringify({ type: 'error', message: 'Invalid move!' }));
+                ws.send(JSON.stringify({ type: 'error',message:'Invalid move!' }));
+                
             }
         }
     });
@@ -135,13 +134,17 @@ wsServer.on('connection', (ws, req) => {
     ws.on('close', () => {
         console.log('A user disconnected');
     });
+   
 });
+
+
 
 function handleMonsterInsertion(gameState, playerId, row, col, monsterType) {
     if (isValidInsertion(playerId, row, col)) {
         gameState.board[row][col] = {
             playerId: playerId,
-            monsterType: monsterType
+            monsterType: monsterType,
+            hasMoved: true // Set hasMoved to true for a newly placed monster
         };
         if (!gameState.monsters[playerId]) {
             gameState.monsters[playerId] = [];
@@ -159,10 +162,22 @@ function isValidInsertion(playerId, row, col) {
     return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
 }
 
-function resetMonsterMovement(gameState, currentPlayerIndex){
-    let players = gameState.players;
-    gameState.monsters[players[currentPlayerIndex].id].forEach(monster => {
-        monster.hasMoved = false;
+function resetMonsterMovement(gameState, currentPlayerIndex) {
+    /*let playerId = gameState.players[currentPlayerIndex].id;
+    if (gameState.monsters[playerId]) {
+        gameState.monsters[playerId].forEach(monster => {
+            monster.hasMoved = false;
+            gameState.board[monster.row][monster.col].hasMoved = false;
+        });
+    }*/
+    // Iterate over all players
+    Object.values(gameState.monsters).forEach(playerMonsters => {
+        // Iterate over all monsters for each player
+        playerMonsters.forEach(monster => {
+            // Reset the hasMoved flag for each monster
+            monster.hasMoved = false;
+            gameState.board[monster.row][monster.col].hasMoved = false;
+        });
     });
     return gameState;
 }
@@ -172,13 +187,19 @@ function getRandomPlayerIndex(){
 }
 
 function isValidMove(playerId, fromRow, fromCol, toRow, toCol, isAttack = false) {
+    const targetCell = gameState.board[toRow][toCol];
+    const movingMonster = gameState.board[fromRow][fromCol];
+    // if he already moved this turn
+    if (movingMonster.hasMoved) {
+        console.log('Invalid move: Monster has already moved this turn.');
+        return false;
+    }
     // Check if the move is within bounds
     if (!isInBounds(toRow, toCol)) {
         return false;
     }
 
-    const targetCell = gameState.board[toRow][toCol];
-
+    
     if (!isAttack) {
         // For normal moves, the target cell must be empty or contain the player's own monster
         if (targetCell && targetCell.playerId !== playerId) {
@@ -218,25 +239,24 @@ function isValidMove(playerId, fromRow, fromCol, toRow, toCol, isAttack = false)
             currentRow += rowIncrement;
             currentCol += colIncrement;
         }
-
+        movingMonster.hasMoved = true; // Set hasMoved to true after a valid move
         return true; // Valid move
     }
 
     return false; // Invalid move
 }
 
-
-
 function handleAttackMonster(data) {
     const { playerId, fromRow, fromCol, toRow, toCol } = data;
     const attackingMonster = gameState.board[fromRow][fromCol];
     const defendingMonster = gameState.board[toRow][toCol];
-
+    console.log(attackingMonster)
+    console.log(defendingMonster)
     if (!attackingMonster || !defendingMonster) {
         console.log('Invalid attack: one of the monsters does not exist.');
         return gameState; // Return gameState even if no changes are made
     }
-
+    
     const attackType = gameState.monsterTypes[attackingMonster.monsterType].name;
     const defendType = gameState.monsterTypes[defendingMonster.monsterType].name;
 
@@ -250,9 +270,10 @@ function handleAttackMonster(data) {
 
     if (result === 'win') {
         // Attacking monster wins
+        removeMonster(defendingMonster.playerId, toRow, toCol);
         gameState.board[toRow][toCol] = attackingMonster;
         gameState.board[fromRow][fromCol] = null;
-        removeMonster(defendingMonster.playerId, toRow, toCol);
+        updateMonsterPosition(attackingMonster.playerId, fromRow, fromCol, toRow, toCol);
         updatePlayerMonsterCount(defendingMonster.playerId, -1);
     } else if (result === 'lose') {
         // Defending monster wins
@@ -266,11 +287,18 @@ function handleAttackMonster(data) {
     return gameState; // Return the updated game state
 }
 
+function updateMonsterPosition(playerId, fromRow, fromCol, toRow, toCol) {
+    const monster = gameState.monsters[playerId].find(m => m.row === fromRow && m.col === fromCol);
+    if (monster) {
+        monster.row = toRow;
+        monster.col = toCol;
+    }
+}
+
 function updatePlayerMonsterCount(playerId, change) {
     const player = gameState.players.find(p => p.id === playerId);
     if (player) {
         player.alive += change;
-        player.monsterCount--;
     }
 }
 

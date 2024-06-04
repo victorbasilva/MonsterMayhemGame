@@ -214,3 +214,12 @@ button:hover {
     background-color: #f2f2f2;
 }
 
+
+.has-moved {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+.monster {
+    cursor: pointer;
+}
