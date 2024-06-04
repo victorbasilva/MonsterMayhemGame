@@ -122,11 +122,12 @@ button:hover {
 }
 
 .light-gray {
-    background-color: lightslategray;
+    background-color: lightgray;
 }
 .light-blue{
     background-color: lightblue;
 }
+
 .selected{
     box-shadow: inset 0px 0px 3px 3px #a9ff00;
 }
@@ -168,23 +169,31 @@ button:hover {
 
 /* Player's monsters background colors */
 .player-1 {
-    background-color: rgba(255, 0, 0, 0.5); /* Red */
+    background-color:#087e08 ;
+    /*background-color: rgba(255, 0, 0, 0.5);*/ /* Red */
     padding: 5px; 
+    color: white;
 }
 
 .player-2 {
-    background-color: rgba(0, 255, 0, 0.5); /* Green */
+    /*background-color: rgba(0, 255, 0, 0.5); *//* Green */
+    background-color: #101010;
     padding: 5px; 
+    color: white;
 }
 
 .player-3 {
-    background-color: rgba(0, 0, 255, 0.5); /* Blue */
+    background-color:  rgb(180, 35, 35);
+    /*background-color: rgba(0, 0, 255, 0.5); *//* Blue */
     padding: 5px; 
+    color: white;
 }
 
 .player-4 {
-    background-color: rgba(255, 255, 0, 0.5); /* Yellow */
+    background-color: rgb(18 101 192);
+    /*background-color: rgba(255, 255, 0, 0.5);*/ /* Yellow */
     padding: 5px; 
+    color: white;
 }
 
 
@@ -205,19 +214,3 @@ button:hover {
     background-color: #f2f2f2;
 }
 
-/* Square's colors */
-.player-1 {
-    background-color: rgba(255, 0, 0, 1); /* Red */
-}
-
-.player-2 {
-    background-color: rgba(0, 255, 0, 1); /* Green */
-}
-
-.player-3 {
-    background-color: rgba(0, 0, 255, 1); /* Blue */
-}
-
-.player-4 {
-    background-color: rgba(255, 255, 0, 1); /* Yellow */
-}

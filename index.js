@@ -48,7 +48,7 @@ gameState.monsterTypes = monsterTypes;
 gameState.players;
 gameState.board = Array.from({ length: 10 }, () => Array(10).fill(null));
 gameState.currentPlayerIndex = currentPlayerIndex;
-gameState. started = false;
+gameState.started = false;
 
 wsServer.on('connection', (ws, req) => {
     console.log('A user connected');
@@ -148,6 +148,7 @@ function handleMonsterInsertion(gameState, playerId, row, col, monsterType) {
         }
         gameState.monsters[playerId].push({ row, col, monsterType, hasMoved: false });
         gameState.players.find(player => player.id === playerId).monsterCount++;
+        gameState.players.find(player => player.id === playerId).placed++;
     }
     return gameState;
 }
@@ -268,6 +269,7 @@ function updatePlayerMonsterCount(playerId, change) {
     const player = gameState.players.find(p => p.id === playerId);
     if (player) {
         player.alive += change;
+        player.monsterCount--;
     }
 }
 

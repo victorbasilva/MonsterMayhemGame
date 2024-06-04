@@ -3,6 +3,7 @@ const wsServer = new WebSocket(url);
 
 let playerName;
 let game;
+let currentPlayer;
 let currentPlayerIndex;
 let players;
 let monsters;
@@ -50,6 +51,8 @@ function updateGame(gameState){
     monsters = gameState.monsters;
     areas = gameState.areas;
     monsterTypes = gameState.monsterTypes;
+    currentPlayer = players[currentPlayerIndex];
+    updatePlayerList(players);
     console.log(gameState)
 }
 
@@ -84,6 +87,10 @@ function onStartGame(){
 }
 
 function skipTurn() {
+    if (gamePlayer.name !== currentPlayer.name) {
+        alert('It is not your turn!');
+        return;
+    }
     wsServer.send(JSON.stringify({type: 'onSkipTurn'}));
 }
 
@@ -97,13 +104,12 @@ function startGame(gameState) {
     updateCurrentPlayer();
     
     // Hide buttons on the home screen
-    document.getElementById('insert-monster').style.display = 'inline-block';
-    document.getElementById('move-monster').style.display = 'inline-block';
     document.getElementById('skip-turn').style.display = 'inline-block';
 
     const gamePlayerDiv = document.getElementById('game-player');
     gamePlayerDiv.classList.remove('hidden');
-    gamePlayerDiv.innerHTML = `<div class="game-player-text">${gamePlayer.name}</div>`;
+    const playerColor = `player-${gamePlayer.id}`;
+    gamePlayerDiv.innerHTML = `<div class="game-player-text player ${playerColor}">${gamePlayer.name}</div>`;
 }
 
 function renderBoard(gameState){
@@ -149,7 +155,7 @@ function renderBoard(gameState){
 
 
 function updateCurrentPlayer() {
-    const currentPlayer = players[currentPlayerIndex];
+    currentPlayer = players[currentPlayerIndex];
     statusDiv.innerHTML = `TURN: <strong>${currentPlayer.name}</strong>`;
     statusDiv.style.color = 'red';
     statusDiv.style.fontSize = '24px';
@@ -239,129 +245,7 @@ function handleCellClick(event) {
 function isValidInsertion(playerId, row, col) {
     const area = game.areas[playerId];
     return (row >= area.startRow && row <= area.endRow && col >= area.startCol && col <= area.endCol);
-
 }
-
-/*document.getElementById('move-monster').addEventListener('click', () => {
-    const currentPlayer = players[currentPlayerIndex];
-    const monsterCells = monsters[currentPlayer.id].filter(monster => !monster.hasMoved);
-
-    if (monsterCells.length === 0) {
-        alert('No monsters to move!');
-        return;
-    }
-
-    let monsterOptions = 'Choose a monster to move:\n';
-    const monstersToMove = [];
-
-    monsterCells.forEach((monster, index) => {
-        const row = monster.row;
-        const col = monster.col;
-        const monsterType = monsterTypes[parseInt(board.rows[row].cells[col].dataset.type)].name;
-        monsterOptions += `${index + 1}. ${monsterType} at (${row}, ${col})\n`;
-        monstersToMove.push(monster);
-    });
-
-    const choice = parseInt(prompt(monsterOptions)) - 1;
-
-    if (choice < 0 || choice >= monstersToMove.length) {
-        alert('Invalid choice!');
-        return;
-    }
-
-    const fromRow = parseInt(monstersToMove[choice].row);
-    const fromCol = parseInt(monstersToMove[choice].col);
-    const toRow = parseInt(prompt('To row:'));
-    const toCol = parseInt(prompt('To column:'));
-
-    moveMonster(currentPlayer, fromRow, fromCol, toRow, toCol);
-});*/
-
-function moveMonster(player, fromRow, fromCol, toRow, toCol) {
-    const fromCell = board.rows[fromRow].cells[fromCol];
-    const toCell = board.rows[toRow].cells[toCol];
-
-    if (fromCell.dataset.player != player.id) {
-        alert('You can only move your own monsters!');
-        return;
-    }
-
-    const validMove = (
-        (toRow === fromRow && toCol !== fromCol) || // Horizontal move
-        (toRow !== fromRow && toCol === fromCol) || // Vertical move
-        (Math.abs(toRow - fromRow) <= 2 && Math.abs(toCol - fromCol) <= 2) // Diagonal move
-    );
-
-    if (!validMove) {
-        alert('Invalid move!');
-        return;
-    }
-
-    const monsterType = parseInt(fromCell.dataset.type);
-    fromCell.innerText = '';
-    fromCell.dataset.player = '';
-    fromCell.dataset.type = '';
-
-    if (toCell.dataset.player) {
-        handleCombat(toCell, monsterType);
-    } else {
-        toCell.innerText = monsterTypes[monsterType].icon;
-        toCell.dataset.player = player.id;
-        toCell.dataset.type = monsterType;
-    }
-
-    const movedMonster = monsters[player.id].find(monster => monster.row === fromRow && monster.col === fromCol);
-    movedMonster.row = toRow;
-    movedMonster.col = toCol;
-    movedMonster.hasMoved = true; // Mark as moved
-
-    updatePlayerStatus(); // Update player status
-}
-
-
-
-function handleCombat(cell, attackingMonsterType) {
-    const defendingPlayerId = parseInt(cell.dataset.player);
-    const defendingMonsterType = parseInt(cell.dataset.type);
-
-    const attackingMonster = monsterTypes[attackingMonsterType];
-    const defendingMonster = monsterTypes[defendingMonsterType];
-
-    if (!attackingMonster || !defendingMonster) {
-        alert('Invalid monster types for combat!');
-        return;
-    }
-
-    const attackingMonsterName = attackingMonster.name;
-    const defendingMonsterName = defendingMonster.name;
-
-    const combatRules = {
-        'vampire': { 'werewolf': 'lose', 'ghost': 'win' },
-        'werewolf': { 'ghost': 'lose', 'vampire': 'win' },
-        'ghost': { 'vampire': 'lose', 'werewolf': 'win' }
-    };
-
-    const combatResult = combatRules[attackingMonsterName][defendingMonsterName];
-
-    if (combatResult === 'win') {
-        alert(`${attackingMonsterName} wins against ${defendingMonsterName}!`);
-        removeMonsterFromList(defendingPlayerId, cell.dataset.row, cell.dataset.col);
-        cell.innerText = monsterTypes[attackingMonsterType].icon;
-        cell.dataset.player = players[currentPlayerIndex].id;
-        cell.dataset.type = attackingMonsterType;
-    } else {
-        alert(`${defendingMonsterName} wins against ${attackingMonsterName}!`);
-        removeMonsterFromList(players[currentPlayerIndex].id, cell.dataset.row, cell.dataset.col);
-        cell.innerText = monsterTypes[defendingMonsterType].icon;
-        cell.dataset.player = defendingPlayerId;
-        cell.dataset.type = defendingMonsterType;
-    }
-}
-
-function removeMonsterFromList(playerId, row, col) {
-    monsters[playerId] = monsters[playerId].filter(monster => monster.row != row || monster.col != col);
-}
-
 
 
 function updatePlayerStatus() {
@@ -385,41 +269,32 @@ function updatePlayerStatus() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    const players = []; // Array that stores the players
+function updatePlayerList(players) {
+    const playerList = document.getElementById('player-list');
+    playerList.innerHTML = ''; // Clears the existing list
 
-    // Example function to add a player (must be adapted to the game logic)
-    function addPlayer(playerName, playerColorClass) {
-        players.push({ name: playerName, colorClass: playerColorClass });
-        updatePlayerList();
-    }
+    players.forEach(player => {
+        const row = document.createElement('tr');
 
-    // Function that updates the table with players
-    function updatePlayerList() {
-        const playerList = document.getElementById('player-list');
-        playerList.innerHTML = ''; // Clears the existing list
+        const nameCell = document.createElement('td');
+        nameCell.textContent = player.name;
+        row.appendChild(nameCell);
 
-        players.forEach(player => {
-            const row = document.createElement('tr');
+        const colorCell = document.createElement('td');
+        colorCell.className = `player-${player.id}`;
+        row.appendChild(colorCell);
 
-            const nameCell = document.createElement('td');
-            nameCell.textContent = player.name;
-            row.appendChild(nameCell);
+        const placedMonsterCell = document.createElement('td');
+        placedMonsterCell.textContent = `${player.placed} /10`;
+        row.appendChild(placedMonsterCell);
 
-            const colorCell = document.createElement('td');
-            colorCell.className = player.colorClass;
-            row.appendChild(colorCell);
+        const aliveMonstersCell = document.createElement('td');
+        aliveMonstersCell.textContent = `${player.alive} /10`;
+        row.appendChild(aliveMonstersCell);
 
-            playerList.appendChild(row);
-        });
-    }
-
-    // Example of players (must add the players according to the logic)
-    addPlayer('Player 1', 'player-1');
-    addPlayer('Player 2', 'player-2');
-    addPlayer('Player 3', 'player-3');
-    addPlayer('Player 4', 'player-4');
-});
+        playerList.appendChild(row);
+    });
+}
 
 
 
