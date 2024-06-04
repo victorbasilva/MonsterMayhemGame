@@ -294,7 +294,16 @@ app.get("/", (req, res) => {
 
 app.get("/index", (req, res) => {
     const name = req.session.name;
-    console.log(name)
+    //if there is no name redirect back to player creation
+    if(!name){
+        res.redirect("/" );
+        return;
+    }
+    // if there is already 4 players redirect
+    if(players.length >=4 ){
+        res.redirect("/" );
+        return;
+    }
     req.session.name = null; 
     gameState.started = true;
     let player = players.find(player=>player.name == name);
