@@ -1,7 +1,7 @@
 const url = "ws://localhost:3000";
 const wsServer = new WebSocket(url);
 
-let playerName;
+;
 let game;
 let currentPlayer;
 let currentPlayerIndex;
@@ -53,7 +53,16 @@ function updateGame(gameState){
     monsterTypes = gameState.monsterTypes;
     currentPlayer = players[currentPlayerIndex];
     updatePlayerList(players);
-    console.log(gameState)
+    // update current game player with values from server after each game update
+    updateGamePlayer(players);
+}
+
+function updateGamePlayer(players){
+    gamePlayer = players.find(player=> player.id == gamePlayer.id);
+    if(gamePlayer.alive == 0){
+        alert('Game over! You lost all your monsters!');
+        return;
+    }
 }
 
 function updatePlayers(players){
@@ -219,6 +228,11 @@ function handleCellClick(event) {
             isMonsterSelected = false; // Reset monster selection
             cell.classList.remove('selected'); // remove class
         }else{
+            // prevent insertion more than 10 monsters
+            if(gamePlayer.placed == 10){
+                alert('You placed all your monsters!')
+                return;
+            }
             //handle monster placement
             if (isValidInsertion(currentPlayer.id, row, col)) {
                 const monsterType = parseInt(prompt('Choose a monster to place: 1 (vampire), 2 (werewolf), 3 (ghost)'));

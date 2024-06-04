@@ -146,7 +146,8 @@ function handleMonsterInsertion(gameState, playerId, row, col, monsterType) {
         if (!gameState.monsters[playerId]) {
             gameState.monsters[playerId] = [];
         }
-        gameState.monsters[playerId].push({ row, col, monsterType, hasMoved: false });
+        // placing monster sets hasMoved to true so it cant be moved this turn
+        gameState.monsters[playerId].push({ row, col, monsterType, hasMoved: true });
         gameState.players.find(player => player.id === playerId).monsterCount++;
         gameState.players.find(player => player.id === playerId).placed++;
     }
